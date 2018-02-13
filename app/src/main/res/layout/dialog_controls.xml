@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:divider="@drawable/separator"
+    android:orientation="vertical"
+    android:showDividers="middle">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="12dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        android:textStyle="bold"/>
+
+    <include
+        android:id="@+id/download"
+        layout="@layout/file_item"/>
+
+    <include
+        android:id="@+id/upload"
+        layout="@layout/file_item"/>
+
+    <include
+        android:id="@+id/deleteClient"
+        layout="@layout/file_item"/>
+
+    <include
+        android:id="@+id/deleteServer"
+        layout="@layout/file_item"/>
+
+</LinearLayout>
