@@ -12,7 +12,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 
 public class ClientController
 {
@@ -116,7 +115,7 @@ public class ClientController
 				}
 				else
 				{
-					Files.copy(source.toPath(), dest.toPath());
+					FileUtils.copyFile(source, dest);
 				}
 				requestStatus = new RequestStatus(true);
 			}
