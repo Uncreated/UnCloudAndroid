@@ -23,12 +23,14 @@ public class AuthActivity
 	private static final String LOGIN_KEY = "loginKey";
 	private static final String PASSWORD_KEY = "passwordKey";
 
-	EditText loginEditText;
-	EditText passwordEditText;
-	Button registerButton;
-	Button authButton;
-	CheckBox rememberCheckBox;
-	ProgressBar progressBar;
+	private EditText loginEditText;
+	private EditText passwordEditText;
+	private Button registerButton;
+	private Button authButton;
+	private CheckBox rememberCheckBox;
+	private ProgressBar progressBar;
+
+	private boolean autoAuth;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -44,14 +46,40 @@ public class AuthActivity
 		progressBar = findViewById(R.id.progressBar);
 
 		SharedPreferences sharedPreferences = getSharedPreferences(PREF_KEY, MODE_PRIVATE);
-		if (sharedPreferences.getBoolean(REMEMBER_KEY, false))
+		autoAuth = sharedPreferences.getBoolean(REMEMBER_KEY, false);
+		if (autoAuth)
 		{
 			rememberCheckBox.setChecked(true);
 			loginEditText.setText(sharedPreferences.getString(LOGIN_KEY, ""));
 			passwordEditText.setText(sharedPreferences.getString(PASSWORD_KEY, ""));
 		}
+		else
+		{
+			setLoading(false);
+		}
+	}
 
-		setLoading(false);
+	@Override
+	protected void onRestart()
+	{
+		super.onRestart();
+
+		autoAuth = false;
+	}
+
+	@Override
+	protected void onStart()
+	{
+		super.onStart();
+
+		if (rememberCheckBox.isChecked() && autoAuth)
+		{
+			onAuthClick(authButton);
+		}
+		else
+		{
+			setLoading(false);
+		}
 	}
 
 	private void setLoading(boolean on)
@@ -60,6 +88,7 @@ public class AuthActivity
 		passwordEditText.setEnabled(!on);
 		registerButton.setEnabled(!on);
 		authButton.setEnabled(!on);
+		rememberCheckBox.setEnabled(!on);
 		progressBar.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
 	}
 
@@ -95,12 +124,14 @@ public class AuthActivity
 	@Override
 	public void onAuth(RequestStatus requestStatus)
 	{
-		setLoading(false);
 		if (requestStatus.isOk())
 		{
 			Intent intent = new Intent(this, FilesActivity.class);
 			startActivity(intent);
 		}
-
+		else
+		{
+			setLoading(false);
+		}
 	}
 }

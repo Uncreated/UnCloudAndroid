@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,9 +44,14 @@ public class FilesActivity
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 		floatingActionsMenu = findViewById(R.id.fabMenu);
+	}
+
+	@Override
+	protected void onStart()
+	{
+		super.onStart();
 
 		((App) getApplication()).getClientController().updateFiles();
-
 	}
 
 	@Override
@@ -134,8 +142,11 @@ public class FilesActivity
 				if (resultCode == RESULT_OK)
 				{
 					Uri uri = data.getData();
-					File file = new File(uri.getPath());
-					((App) getApplication()).getClientController().copyFile(file, curFolder);
+					if (uri != null)
+					{
+						File file = new File(uri.getPath());
+						((App) getApplication()).getClientController().copyFile(file, curFolder);
+					}
 				}
 				break;
 		}
@@ -204,15 +215,53 @@ public class FilesActivity
 		showFolder(curFolder.getParentFolder());
 	}
 
+
+	private boolean firstClickOnBack = false;
+
 	@Override
 	public void onBackPressed()
 	{
-
+		if (firstClickOnBack)
+		{
+			Intent intent = new Intent(Intent.ACTION_MAIN);
+			intent.addCategory(Intent.CATEGORY_HOME);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
+		}
+		else
+		{
+			news("Click again to exit the app");
+			firstClickOnBack = true;
+			new Handler().postDelayed(() ->
+			{
+				firstClickOnBack = false;
+			}, 2000);
+		}
 	}
 
 	@Override
 	public void onLogout()
 	{
-		super.onBackPressed();
+		finish();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		getMenuInflater().inflate(R.menu.actionbar_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch (item.getItemId())
+		{
+			case R.id.menu_logout:
+				onLogout();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 }

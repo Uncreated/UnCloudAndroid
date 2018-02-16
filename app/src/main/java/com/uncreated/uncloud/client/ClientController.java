@@ -25,9 +25,8 @@ public class ClientController
 
 	private String rootFolder;
 
-	public ClientController(ClientView clientView, String rootFolder)
+	public ClientController(String rootFolder)
 	{
-		setClientView(clientView);
 		requestHandler = new RequestHandler();
 		storage = new Storage(rootFolder);
 		this.rootFolder = rootFolder;

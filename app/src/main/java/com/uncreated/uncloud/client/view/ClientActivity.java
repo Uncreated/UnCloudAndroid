@@ -18,15 +18,14 @@ public abstract class ClientActivity
 	protected void onCreate(@Nullable Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
-		((App) getApplication()).getClientController().setClientView(this);
 	}
 
 	@Override
-	protected void onDestroy()
+	protected void onStart()
 	{
-		super.onDestroy();
-		((App) getApplication()).getClientController().setClientView(null);
+		super.onStart();
+
+		((App) getApplication()).getClientController().setClientView(this);
 	}
 
 	@Override

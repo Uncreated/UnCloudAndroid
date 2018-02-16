@@ -31,7 +31,7 @@
             app:fab_colorPressed="#226693"
             app:fab_icon="@drawable/create_folder"
             app:fab_size="normal"
-            app:fab_title="Create Folder"
+            app:fab_title="@string/fab_create_folder"
             android:onClick="onCreateFolderClick"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
@@ -42,7 +42,7 @@
             app:fab_colorPressed="#226693"
             app:fab_icon="@drawable/add_file"
             app:fab_size="normal"
-            app:fab_title="Add File"
+            app:fab_title="@string/fab_add_file"
             android:onClick="onAddFileClick"/>
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>

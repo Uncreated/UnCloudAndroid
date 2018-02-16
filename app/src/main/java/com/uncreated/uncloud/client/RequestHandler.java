@@ -25,7 +25,7 @@ import java.util.ArrayList;
 class RequestHandler
 {
 	private static final int TRY_COUNT = 3;
-	private static final String API_URL = "http://192.168.1.43:8080/api/";
+	private static final String API_URL = "http://192.168.7.102:8080/api/";
 	private static final RestTemplate restTemplate = new RestTemplate();
 
 	private Session session;

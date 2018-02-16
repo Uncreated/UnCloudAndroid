@@ -12,7 +12,7 @@ public class App
 	{
 		super.onCreate();
 
-		clientController = new ClientController(null, getFilesDir().getAbsolutePath());
+		clientController = new ClientController(getFilesDir().getAbsolutePath());
 	}
 
 	public ClientController getClientController()

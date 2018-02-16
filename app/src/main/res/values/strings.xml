@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">UnCloud</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="menu_logout">Logout</string>
+
+    <string name="edit_text_hint_login">Login</string>
+    <string name="edit_text_hint_password">Password</string>
+
+    <string name="button_auth">Auth</string>
+    <string name="button_register">Register</string>
+    <string name="button_remember_me">Remember Me</string>
+    <string name="fab_create_folder">Create Folder</string>
+    <string name="fab_add_file">Add File</string>
 </resources>
