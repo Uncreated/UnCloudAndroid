@@ -4,7 +4,6 @@ import com.uncreated.uncloud.client.Controller;
 import com.uncreated.uncloud.client.files.view.FilesView;
 import com.uncreated.uncloud.client.requests.RequestHandler;
 import com.uncreated.uncloud.client.requests.RequestStatus;
-import com.uncreated.uncloud.common.filestorage.FNode;
 import com.uncreated.uncloud.common.filestorage.FileNode;
 import com.uncreated.uncloud.common.filestorage.FileTransfer;
 import com.uncreated.uncloud.common.filestorage.FolderNode;
@@ -51,7 +50,7 @@ public class FilesController
 		});
 	}
 
-	private <T extends FNode> T getFNode(FileInfo fileInfo)
+	private <T extends FileNode> T getFileNode(FileInfo fileInfo)
 	{
 		if (fileInfo.isDirectory())
 		{
@@ -89,7 +88,7 @@ public class FilesController
 		}
 		else if (fileInfo.isDirectory())
 		{
-			FolderNode folderNode = getFNode(fileInfo);
+			FolderNode folderNode = getFileNode(fileInfo);
 			if (folderNode != null)
 			{
 				curFolder = folderNode;
@@ -120,7 +119,7 @@ public class FilesController
 			requestStatus = getMergedFolder();
 			if (requestStatus.isOk())
 			{
-				curFolder = mergedFolder;
+				curFolder = mergedFolder.goTo(curFolder != null ? curFolder.getFilePath() : "/");
 			}
 		}
 
@@ -129,7 +128,7 @@ public class FilesController
 		{
 			if (reqStatus.isOk())
 			{
-				sendFileInfo(mergedFolder);
+				sendFileInfo(curFolder);
 			}
 			else
 			{
@@ -273,11 +272,11 @@ public class FilesController
 
 			if (fileInfo.isDirectory())
 			{
-				requestStatus = downloadFolder(getFNode(fileInfo));
+				requestStatus = downloadFolder(getFileNode(fileInfo));
 			}
 			else
 			{
-				requestStatus = downloadFile(getFNode(fileInfo));
+				requestStatus = downloadFile(getFileNode(fileInfo));
 			}
 
 			folderUpdateRequestResult(requestStatus);
@@ -353,11 +352,11 @@ public class FilesController
 			RequestStatus requestStatus;
 			if (fileInfo.isDirectory())
 			{
-				requestStatus = uploadFolder(getFNode(fileInfo));
+				requestStatus = uploadFolder(getFileNode(fileInfo));
 			}
 			else
 			{
-				requestStatus = uploadFile(getFNode(fileInfo));
+				requestStatus = uploadFile(getFileNode(fileInfo));
 			}
 
 			folderUpdateRequestResult(requestStatus);
@@ -371,7 +370,7 @@ public class FilesController
 			RequestStatus requestStatus;
 			try
 			{
-				FNode fNode = getFNode(fileInfo);
+				FileNode fNode = getFileNode(fileInfo);
 				storage.removeFile(login, fNode.getFilePath());
 				requestStatus = new RequestStatus(true);
 			}
@@ -388,10 +387,10 @@ public class FilesController
 	{
 		runThread(() ->
 		{
-			FNode fNode = getFNode(fileInfo);
-			if (fNode != null)
+			FileNode fileNode = getFileNode(fileInfo);
+			if (fileNode != null)
 			{
-				folderUpdateRequestResult(requestHandler.removeFile(fNode.getFilePath()));
+				folderUpdateRequestResult(requestHandler.removeFile(fileNode.getFilePath()));
 			}
 		});
 	}

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.method.KeyListener;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,7 +40,6 @@ public class AuthActivity
 
 	private Set<String> logins;
 
-	private boolean autoAuth = true;
 	private boolean withPass = true;
 
 	@Override
@@ -100,7 +100,7 @@ public class AuthActivity
 	}
 
 	@Override
-	public void selectUser(String login)
+	public void selectUser(String login, boolean autoAuth)
 	{
 		withPass = false;
 
@@ -119,6 +119,11 @@ public class AuthActivity
 			passwordKeyListener = passwordEditText.getKeyListener();
 		}
 		passwordEditText.setKeyListener(null);
+
+		if (autoAuth)
+		{
+			onAuthClick(authButton);
+		}
 	}
 
 	private void selectNewUser()
@@ -137,7 +142,7 @@ public class AuthActivity
 	@Override
 	public void onRegisterOk()
 	{
-		setLoading(false);
+		hideLoading();
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("User successfully registered");
 		builder.setMessage("You can authorize now");
@@ -151,66 +156,25 @@ public class AuthActivity
 	@Override
 	public void onAuthOk()
 	{
-		setLoading(false);
 		Intent intent = new Intent(this, FilesActivity.class);
 		startActivity(intent);
+		hideLoading();
 	}
 
 	@Override
 	public void onRequestTimeout()
 	{
-		setLoading(false);
+		hideLoading();
 		news("Request timed out");
 	}
 
 	@Override
 	public void onRequestIncorrect()
 	{
-		setLoading(false);
+		hideLoading();
 		news("Incorrect login or password");
 		passwordEditText.setText("");
 		passwordEditText.setKeyListener(passwordKeyListener);
-	}
-
-	@Override
-	protected void onRestart()
-	{
-		super.onRestart();
-
-		autoAuth = false;
-	}
-
-	@Override
-	protected void onStart()
-	{
-		super.onStart();
-
-		if (autoAuth && !withPass)
-		{
-			onAuthClick(authButton);
-		}
-		else
-		{
-			setLoading(false);
-		}
-	}
-
-	private void setLoading(boolean on)
-	{
-		loginEditText.setEnabled(!on);
-		passwordEditText.setEnabled(!on);
-		registerButton.setEnabled(!on);
-		authButton.setEnabled(!on);
-		changeUserButton.setEnabled(!on);
-		if (on)
-		{
-			showLoading();
-		}
-		else
-		{
-			hideLoading();
-		}
-		//progressBar.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
 	}
 
 	public void onRegisterClick(View view)
@@ -221,7 +185,7 @@ public class AuthActivity
 			String password = passwordEditText.getText().toString();
 			if (password.length() > 0)
 			{
-				setLoading(true);
+				showLoading();
 				controller.register(login, password);
 			}
 			else
@@ -245,7 +209,7 @@ public class AuthActivity
 				String password = passwordEditText.getText().toString();
 				if (password.length() > 0)
 				{
-					setLoading(true);
+					showLoading();
 					controller.auth(login, password);
 				}
 				else
@@ -255,6 +219,7 @@ public class AuthActivity
 			}
 			else
 			{
+				showLoading();
 				controller.auth();
 			}
 		}

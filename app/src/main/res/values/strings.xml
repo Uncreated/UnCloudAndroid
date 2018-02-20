@@ -16,4 +16,5 @@
     <string name="menu_delete_client">Delete from client</string>
     <string name="menu_delete_server">Delete from server</string>
     <string name="change_user_title">Change User</string>
+    <string name="loading">Loading...</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.uncreated.uncloud.client.files;
 
-import com.uncreated.uncloud.common.filestorage.FNode;
 import com.uncreated.uncloud.common.filestorage.FileNode;
 import com.uncreated.uncloud.common.filestorage.FolderNode;
 
@@ -16,17 +15,9 @@ public class FileInfo
 	private boolean deleteAnyClient;
 	private boolean deleteAnyServer;
 
-	private FileInfo(FNode fNode)
-	{
-		this.name = fNode.getName();
-		this.info = makeInfo(fNode);
-		this.downloaded = fNode.isOnClient();
-		this.uploaded = fNode.isOnServer();
-	}
-
 	FileInfo(FileNode fileNode)
 	{
-		this((FNode)fileNode);
+		init(fileNode);
 
 		this.directory = false;
 		this.downloadAny = !this.downloaded;
@@ -37,7 +28,7 @@ public class FileInfo
 
 	FileInfo(FolderNode folderNode)
 	{
-		this((FNode)folderNode);
+		init(folderNode);
 
 		this.directory = true;
 		this.downloadAny = !folderNode.isFilesOnClient(true);
@@ -46,37 +37,45 @@ public class FileInfo
 		this.deleteAnyServer = folderNode.isFilesOnServer(false);
 	}
 
-	private String makeInfo(FNode fNode)
+	private void init(FileNode fileNode)
+	{
+		this.name = fileNode.getName();
+		this.info = makeInfo(fileNode);
+		this.downloaded = fileNode.isOnClient();
+		this.uploaded = fileNode.isOnServer();
+	}
+
+	private String makeInfo(FileNode fileNode)
 	{
 		StringBuilder builder = new StringBuilder();
 		builder.append("Name: ");
-		builder.append(fNode.getName());
+		builder.append(fileNode.getName());
 		builder.append('\n');
 		builder.append("Path: ");
-		if (fNode.getParentFolder() == null)
+		if (fileNode.getParentFolder() == null)
 		{
 			builder.append('/');
 		}
 		else
 		{
-			builder.append(fNode.getParentFolder().getFilePath());
+			builder.append(fileNode.getParentFolder().getFilePath());
 		}
 		builder.append('\n');
 
 		builder.append("Size: ");
-		builder.append(fNode.getSizeString());
+		builder.append(fileNode.getSizeString());
 
 		builder.append('\n');
 		builder.append("Location: ");
-		if (fNode.isOnClient())
+		if (fileNode.isOnClient())
 		{
 			builder.append("client");
 		}
-		if (fNode.isOnClient() && fNode.isOnServer())
+		if (fileNode.isOnClient() && fileNode.isOnServer())
 		{
 			builder.append(", ");
 		}
-		if (fNode.isOnServer())
+		if (fileNode.isOnServer())
 		{
 			builder.append("server");
 		}

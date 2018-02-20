@@ -1,10 +1,13 @@
 package com.uncreated.uncloud.client;
 
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.uncreated.uncloud.R;
 
 public abstract class ActivityView<T extends Controller>
 		extends AppCompatActivity
@@ -13,13 +16,20 @@ public abstract class ActivityView<T extends Controller>
 	protected App app;
 	protected T controller;
 
-	private ProgressDialog progressDialog;
+	private AlertDialog alertDialog;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		app = ((App) getApplication());
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setView(R.layout.loading_dialog);
+		builder.setOnKeyListener(null);
+		alertDialog = builder.create();
+		alertDialog.setCancelable(false);
+
 	}
 
 	@Override
@@ -39,16 +49,18 @@ public abstract class ActivityView<T extends Controller>
 
 	protected void showLoading()
 	{
-		progressDialog = new ProgressDialog(this);
-		progressDialog.show();
+		alertDialog.show();
+
+		/*getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+				WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);*/
 	}
 
 	protected void hideLoading()
 	{
-		if (progressDialog != null)
-		{
-			progressDialog.hide();
-		}
+		alertDialog.hide();
+
+
+		//getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 	}
 
 	protected void setController(T controller)

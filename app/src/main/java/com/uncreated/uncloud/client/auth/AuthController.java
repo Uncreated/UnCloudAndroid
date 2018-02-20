@@ -2,9 +2,9 @@ package com.uncreated.uncloud.client.auth;
 
 import com.google.gson.Gson;
 import com.uncreated.uncloud.client.Controller;
+import com.uncreated.uncloud.client.auth.view.AuthView;
 import com.uncreated.uncloud.client.requests.RequestHandler;
 import com.uncreated.uncloud.client.requests.RequestStatus;
-import com.uncreated.uncloud.client.auth.view.AuthView;
 import com.uncreated.uncloud.server.auth.User;
 
 import java.util.HashMap;
@@ -16,6 +16,8 @@ public class AuthController
 
 	private AuthInfBox authInfBox;
 	private String selLogin;
+
+	private boolean autoAuth = true;
 
 	public AuthController(RequestHandler requestHandler)
 	{
@@ -47,14 +49,15 @@ public class AuthController
 		authView.setUsers(authInfBox.getMap().keySet());
 		if (selLogin != null)
 		{
-			authView.selectUser(selLogin);
+			authView.selectUser(selLogin, autoAuth);
+			autoAuth = false;
 		}
 	}
 
 	public void selectUser(String login)
 	{
 		selLogin = login;
-		view.selectUser(login);
+		view.selectUser(login, false);
 	}
 
 	public void auth()

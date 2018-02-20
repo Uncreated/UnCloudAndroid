@@ -13,7 +13,7 @@ public interface AuthView
 
 	void setUsers(Set<String> logins);
 
-	void selectUser(String login);
+	void selectUser(String login, boolean autoAuth);
 
 	//response
 	void onAuthOk();

@@ -1,7 +1,7 @@
 package com.uncreated.uncloud.client.requests;
 
 import com.uncreated.uncloud.common.RequestException;
-import com.uncreated.uncloud.common.filestorage.FNode;
+import com.uncreated.uncloud.common.filestorage.FileNode;
 import com.uncreated.uncloud.common.filestorage.FileTransfer;
 import com.uncreated.uncloud.common.filestorage.FolderNode;
 import com.uncreated.uncloud.server.auth.Session;
@@ -109,7 +109,7 @@ public class RequestHandler
 		}
 	}
 
-	public RequestStatus<FNode> removeFile(String path)
+	public RequestStatus<FileNode> removeFile(String path)
 	{
 		Request request = new Request("file", HttpMethod.DELETE);
 		request.add("path", path);
@@ -146,7 +146,7 @@ public class RequestHandler
 		request.add("path", path);
 		try
 		{
-			request.go(FNode.class);
+			request.go(FileNode.class);
 			return new RequestStatus(true);
 		}
 		catch (RequestException e)
@@ -175,6 +175,14 @@ public class RequestHandler
 
 		private <RESP, REQ> RESP go(REQ req, Class<RESP> tClass) throws RequestException
 		{
+			try
+			{
+				Thread.sleep(5000);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 			for (int i = 0; i < TRY_COUNT; i++)
 			{
 				try
