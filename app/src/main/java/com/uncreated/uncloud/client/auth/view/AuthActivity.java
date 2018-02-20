@@ -1,6 +1,7 @@
-package com.uncreated.uncloud.client.view.auth;
+package com.uncreated.uncloud.client.auth.view;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -9,16 +10,16 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.App;
-import com.uncreated.uncloud.client.view.ClientActivity;
+import com.uncreated.uncloud.client.ActivityView;
+import com.uncreated.uncloud.client.auth.AuthController;
+import com.uncreated.uncloud.client.files.view.FilesActivity;
 
 import java.util.Set;
 
 public class AuthActivity
-		extends ClientActivity
+		extends ActivityView<AuthController>
 		implements AuthView
 {
 	private static final String PREF_KEY_AUTH = "prefKeyAuthActivity";
@@ -29,16 +30,12 @@ public class AuthActivity
 	private Button registerButton;
 	private Button authButton;
 	private Button changeUserButton;
-	private ProgressBar progressBar;
+	//private ProgressBar progressBar;
 
 	private KeyListener loginKeyListener;
 	private KeyListener passwordKeyListener;
 
 	private SharedPreferences sharedPreferences;
-
-	private App app;
-
-	private AuthController authController;
 
 	private Set<String> logins;
 
@@ -51,6 +48,8 @@ public class AuthActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_auth);
 
+		setController(app.getAuthController());
+
 		sharedPreferences = getSharedPreferences(PREF_KEY_AUTH, MODE_PRIVATE);
 
 		loginEditText = findViewById(R.id.loginEditText);
@@ -58,7 +57,7 @@ public class AuthActivity
 		registerButton = findViewById(R.id.registerButton);
 		authButton = findViewById(R.id.authButton);
 		changeUserButton = findViewById(R.id.changeUserButton);
-		progressBar = findViewById(R.id.progressBar);
+		//progressBar = findViewById(R.id.progressBar);
 
 		InputFilter[] filters = {(charSequence, i, i1, spanned, i2, i3) ->
 		{
@@ -74,32 +73,6 @@ public class AuthActivity
 
 		loginEditText.setFilters(filters);
 		passwordEditText.setFilters(filters);
-
-		/*passwordEditText.addTextChangedListener(new TextWatcher()
-		{
-			@Override
-			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
-			{
-
-			}
-
-			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
-			{
-
-			}
-
-			@Override
-			public void afterTextChanged(Editable editable)
-			{
-				withPass = true;
-			}
-		});*/
-
-		app = ((App) getApplication());
-		authController = app.getClientController();
-
-		authController.attach(this);
 	}
 
 	@Override
@@ -119,7 +92,6 @@ public class AuthActivity
 	@Override
 	public void setUsers(Set<String> logins)
 	{
-		//Получили список пользователей, добавим его в какой-нибудь список
 		this.logins = logins;
 		if (logins.size() == 0)
 		{
@@ -148,7 +120,6 @@ public class AuthActivity
 		}
 		passwordEditText.setKeyListener(null);
 	}
-
 
 	private void selectNewUser()
 	{
@@ -180,10 +151,9 @@ public class AuthActivity
 	@Override
 	public void onAuthOk()
 	{
-		/*Intent intent = new Intent(this, FilesActivity.class);
-		startActivity(intent);*/
 		setLoading(false);
-		news("onAuthOk");
+		Intent intent = new Intent(this, FilesActivity.class);
+		startActivity(intent);
 	}
 
 	@Override
@@ -232,7 +202,15 @@ public class AuthActivity
 		registerButton.setEnabled(!on);
 		authButton.setEnabled(!on);
 		changeUserButton.setEnabled(!on);
-		progressBar.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
+		if (on)
+		{
+			showLoading();
+		}
+		else
+		{
+			hideLoading();
+		}
+		//progressBar.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
 	}
 
 	public void onRegisterClick(View view)
@@ -244,7 +222,7 @@ public class AuthActivity
 			if (password.length() > 0)
 			{
 				setLoading(true);
-				authController.register(login, password);
+				controller.register(login, password);
 			}
 			else
 			{
@@ -268,7 +246,7 @@ public class AuthActivity
 				if (password.length() > 0)
 				{
 					setLoading(true);
-					authController.auth(login, password);
+					controller.auth(login, password);
 				}
 				else
 				{
@@ -277,7 +255,7 @@ public class AuthActivity
 			}
 			else
 			{
-				authController.auth();
+				controller.auth();
 			}
 		}
 		else
@@ -312,7 +290,7 @@ public class AuthActivity
 			}
 			else
 			{
-				authController.selectUser(arrayAdapter.getItem(i));
+				controller.selectUser(arrayAdapter.getItem(i));
 				dialogInterface.dismiss();
 			}
 		});

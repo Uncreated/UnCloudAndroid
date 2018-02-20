@@ -25,7 +25,7 @@ public class FileNode
 	}
 
 	@Override
-	public long getSize()
+	public Long getSize()
 	{
 		return size;
 	}

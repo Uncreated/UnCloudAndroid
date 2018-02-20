@@ -1,9 +1,11 @@
-package com.uncreated.uncloud.client.view.auth;
+package com.uncreated.uncloud.client.auth.view;
 
-import java.util.ArrayList;
+import com.uncreated.uncloud.client.View;
+
 import java.util.Set;
 
 public interface AuthView
+		extends View
 {
 	String getJsonAuthInf();
 

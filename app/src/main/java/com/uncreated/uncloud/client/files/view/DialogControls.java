@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.view.files;
+package com.uncreated.uncloud.client.files.view;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -10,21 +10,21 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.common.filestorage.FNode;
+import com.uncreated.uncloud.client.files.FileInfo;
 
 public class DialogControls
 		extends Dialog
 {
-	private FNode fNode;
+	private FileInfo fileInfo;
 	private View.OnClickListener onClickDownload;
 	private View.OnClickListener onClickUpload;
 	private View.OnClickListener onClickDeleteClient;
 	private View.OnClickListener onClickDeleteServer;
 
-	public DialogControls(@NonNull Context context, FNode fNode)
+	public DialogControls(@NonNull Context context, FileInfo fileInfo)
 	{
 		super(context);
-		this.fNode = fNode;
+		this.fileInfo = fileInfo;
 	}
 
 	public void setOnClickDownload(View.OnClickListener onClickDownload)
@@ -55,9 +55,9 @@ public class DialogControls
 		setContentView(R.layout.dialog_controls);
 
 		TextView textView = findViewById(R.id.title);
-		textView.setText(fNode.getName());
+		textView.setText(fileInfo.getName());
 
-		if (!fNode.isOnClient())
+		if (fileInfo.isDownloadAny())
 		{
 			set(R.id.download, R.drawable.download, "Download", onClickDownload);
 		}
@@ -66,7 +66,7 @@ public class DialogControls
 			remove(R.id.download);
 		}
 
-		if (!fNode.isOnServer())
+		if (fileInfo.isUploadAny())
 		{
 			set(R.id.upload, R.drawable.upload, "Upload", onClickUpload);
 		}
@@ -75,7 +75,7 @@ public class DialogControls
 			remove(R.id.upload);
 		}
 
-		if (fNode.isOnClient())
+		if (fileInfo.isDeleteAnyClient())
 		{
 			set(R.id.deleteClient, R.drawable.delete_client, "Delete from client", onClickDeleteClient);
 		}
@@ -84,7 +84,7 @@ public class DialogControls
 			remove(R.id.deleteClient);
 		}
 
-		if (fNode.isOnServer())
+		if (fileInfo.isDeleteAnyServer())
 		{
 			set(R.id.deleteServer, R.drawable.delete_server, "Delete from server", onClickDeleteServer);
 		}

@@ -1,5 +1,7 @@
 package com.uncreated.uncloud.common.filestorage;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -173,7 +175,8 @@ public class FolderNode
 	}
 
 	@Override
-	public long getSize()
+	@JsonIgnore
+	public Long getSize()
 	{
 		long size = 0;
 		for (FileNode file : files)

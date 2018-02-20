@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.view.files;
+package com.uncreated.uncloud.client.files.view;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -18,27 +18,27 @@ import android.widget.LinearLayout;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.App;
-import com.uncreated.uncloud.client.view.ClientActivity;
-import com.uncreated.uncloud.common.filestorage.FNode;
-import com.uncreated.uncloud.common.filestorage.FolderNode;
+import com.uncreated.uncloud.client.ActivityView;
+import com.uncreated.uncloud.client.files.FileInfo;
+import com.uncreated.uncloud.client.files.FilesController;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class FilesActivity
-		extends ClientActivity
+		extends ActivityView<FilesController>
+		implements FilesView
 {
-	//FolderNode rootFolder;
-	FolderNode curFolder;
-
-	RecyclerView recyclerView;
-	FloatingActionsMenu floatingActionsMenu;
+	private RecyclerView recyclerView;
+	private FloatingActionsMenu floatingActionsMenu;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_files);
+
+		setController(app.getFilesController());
 
 		recyclerView = findViewById(R.id.recyclerView);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -51,7 +51,55 @@ public class FilesActivity
 	{
 		super.onStart();
 
-		((App) getApplication()).getClientController().updateFiles();
+		//showLoading();
+	}
+
+	@Override
+	public void showFolder(ArrayList<FileInfo> files, boolean rootFolder)
+	{
+		hideLoading();
+		FilesAdapter filesAdapter = new FilesAdapter(this, recyclerView, files, !rootFolder);
+		recyclerView.setAdapter(filesAdapter);
+	}
+
+	@Override
+	public void onFailRequest(String message)
+	{
+		hideLoading();
+	}
+
+	public void onClickFile(FileInfo fileInfo)
+	{
+		if (fileInfo == null || fileInfo.isDirectory())
+		{
+			controller.openFolder(fileInfo);
+		}
+	}
+
+	public void onLongClickFile(FileInfo fileInfo)
+	{
+		DialogControls dialogControls = new DialogControls(this, fileInfo);
+		dialogControls.setOnClickDownload(view ->
+		{
+			controller.download(fileInfo);
+			dialogControls.hide();
+		});
+		dialogControls.setOnClickUpload(view ->
+		{
+			controller.upload(fileInfo);
+			dialogControls.hide();
+		});
+		dialogControls.setOnClickDeleteClient(view ->
+		{
+			controller.removeFileFromClient(fileInfo);
+			dialogControls.hide();
+		});
+		dialogControls.setOnClickDeleteServer(view ->
+		{
+			controller.removeFileFromServer(fileInfo);
+			dialogControls.hide();
+		});
+		dialogControls.show();
 	}
 
 	@Override
@@ -61,7 +109,6 @@ public class FilesActivity
 		{
 			if (floatingActionsMenu.isExpanded())
 			{
-
 				Rect outRect = new Rect();
 				floatingActionsMenu.getGlobalVisibleRect(outRect);
 
@@ -100,7 +147,7 @@ public class FilesActivity
 			String folderName = editText.getText().toString();
 			if (folderName.length() > 0)
 			{
-				((App) getApplication()).getClientController().createFolder(folderName, curFolder);
+				controller.createFolder(folderName);
 				dialogInterface.cancel();
 			}
 		});
@@ -145,76 +192,13 @@ public class FilesActivity
 					if (uri != null)
 					{
 						File file = new File(uri.getPath());
-						((App) getApplication()).getClientController().copyFile(file, curFolder);
+						controller.copyFile(file);
 					}
 				}
 				break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
-	private void showFolder(FolderNode folderNode)
-	{
-		if (folderNode != null)
-		{
-			curFolder = folderNode;
-			FilesAdapter filesAdapter = new FilesAdapter(this, recyclerView, folderNode);
-			recyclerView.setAdapter(filesAdapter);
-		}
-	}
-
-	public void onClickFNode(FNode fNode)
-	{
-		if (fNode instanceof FolderNode)
-		{
-			showFolder((FolderNode) fNode);
-		}
-	}
-
-	public void openDialog(FNode fNode)
-	{
-		DialogControls dialogControls = new DialogControls(this, fNode);
-		dialogControls.setOnClickDownload(view ->
-		{
-			((App) getApplication()).getClientController().download(fNode);
-			dialogControls.hide();
-		});
-		dialogControls.setOnClickUpload(view ->
-		{
-			((App) getApplication()).getClientController().upload(fNode);
-			dialogControls.hide();
-		});
-		dialogControls.setOnClickDeleteClient(view ->
-		{
-			((App) getApplication()).getClientController().removeFileFromClient(fNode);
-			dialogControls.hide();
-		});
-		dialogControls.setOnClickDeleteServer(view ->
-		{
-			((App) getApplication()).getClientController().removeFileFromServer(fNode);
-			dialogControls.hide();
-		});
-		dialogControls.show();
-	}
-
-	@Override
-	public void onUpdateFiles(FolderNode mergedFiles)
-	{
-		String savedPath = "";
-		if (curFolder != null)
-		{
-			savedPath += curFolder.getFilePath();
-		}
-		savedPath += "/";
-
-		showFolder(mergedFiles.goTo(savedPath));
-	}
-
-	public void goBack()
-	{
-		showFolder(curFolder.getParentFolder());
-	}
-
 
 	private boolean firstClickOnBack = false;
 
@@ -239,7 +223,6 @@ public class FilesActivity
 		}
 	}
 
-	@Override
 	public void onLogout()
 	{
 		finish();

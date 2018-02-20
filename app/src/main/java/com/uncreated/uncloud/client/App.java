@@ -2,23 +2,38 @@ package com.uncreated.uncloud.client;
 
 import android.app.Application;
 
-import com.google.gson.Gson;
+import com.uncreated.uncloud.client.auth.AuthController;
+import com.uncreated.uncloud.client.files.FilesController;
+import com.uncreated.uncloud.client.requests.RequestHandler;
 
 public class App
 		extends Application
 {
-	private ClientController clientController;
+	private FilesController filesController;
+
+	private AuthController authController;
+
+	private RequestHandler requestHandler;
 
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
 
-		clientController = new ClientController(getFilesDir().getAbsolutePath());
+		requestHandler = new RequestHandler();
+
+		authController = new AuthController(requestHandler);
+
+		filesController = new FilesController(requestHandler, getFilesDir().getAbsolutePath());
 	}
 
-	public ClientController getClientController()
+	public FilesController getFilesController()
 	{
-		return clientController;
+		return filesController;
+	}
+
+	public AuthController getAuthController()
+	{
+		return authController;
 	}
 }

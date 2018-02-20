@@ -14,14 +14,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/CloudTheme">
-        <activity android:name=".client.view.auth.AuthActivity">
+        <activity android:name=".client.auth.view.AuthActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".client.view.files.FilesActivity">
+        <activity android:name=".client.files.view.FilesActivity">
         </activity>
     </application>
 

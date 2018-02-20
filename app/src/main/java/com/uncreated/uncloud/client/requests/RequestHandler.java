@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client;
+package com.uncreated.uncloud.client.requests;
 
 import com.uncreated.uncloud.common.RequestException;
 import com.uncreated.uncloud.common.filestorage.FNode;
@@ -22,15 +22,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-class RequestHandler
+public class RequestHandler
 {
 	private static final int TRY_COUNT = 3;
-	private static final String API_URL = "http://192.168.7.102:8080/api/";
+	private static final String API_URL = "http://192.168.1.43:8080/api/";
 	private static final RestTemplate restTemplate = new RestTemplate();
 
 	private String accessToken;
 
-	RequestStatus register(String login, String password)
+	public RequestStatus register(String login, String password)
 	{
 		Request request = new Request("register", HttpMethod.POST);
 		try
@@ -45,7 +45,7 @@ class RequestHandler
 		}
 	}
 
-	RequestStatus<String> auth(User user)
+	public RequestStatus<String> auth(User user)
 	{
 		Request request = new Request("auth", HttpMethod.POST);
 		try
@@ -60,7 +60,7 @@ class RequestHandler
 		}
 	}
 
-	RequestStatus<String> auth(String accessToken)
+	public RequestStatus<String> auth(String accessToken)
 	{
 		Request request = new Request("auth", HttpMethod.PUT);
 		try
@@ -77,7 +77,7 @@ class RequestHandler
 		}
 	}
 
-	RequestStatus<FolderNode> files()
+	public RequestStatus<FolderNode> files()
 	{
 		Request request = new Request("files", HttpMethod.GET);
 		try
@@ -92,7 +92,7 @@ class RequestHandler
 		}
 	}
 
-	RequestStatus<FileTransfer> downloadFilePart(String path, Integer part)
+	public RequestStatus<FileTransfer> downloadFilePart(String path, Integer part)
 	{
 		Request request = new Request("file", HttpMethod.GET);
 		request.add("part", part.toString());
@@ -109,7 +109,7 @@ class RequestHandler
 		}
 	}
 
-	RequestStatus<FNode> removeFile(String path)
+	public RequestStatus<FNode> removeFile(String path)
 	{
 		Request request = new Request("file", HttpMethod.DELETE);
 		request.add("path", path);
@@ -125,7 +125,7 @@ class RequestHandler
 		}
 	}
 
-	RequestStatus setFile(FileTransfer fileTransfer)
+	public RequestStatus setFile(FileTransfer fileTransfer)
 	{
 		Request request = new Request("file", HttpMethod.POST);
 		try
@@ -140,7 +140,7 @@ class RequestHandler
 		}
 	}
 
-	RequestStatus createFolder(String path)
+	public RequestStatus createFolder(String path)
 	{
 		Request request = new Request("folder", HttpMethod.POST);
 		request.add("path", path);

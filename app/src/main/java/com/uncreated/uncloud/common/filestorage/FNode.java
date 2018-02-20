@@ -73,8 +73,9 @@ public abstract class FNode
 		return name.toLowerCase().compareTo(o.name.toLowerCase());
 	}
 
-	public abstract long getSize();
+	public abstract Long getSize();
 
+	@JsonIgnore
 	public String getSizeString()
 	{
 		long size = getSize();
