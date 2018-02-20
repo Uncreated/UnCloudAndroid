@@ -11,4 +11,9 @@
     <string name="button_remember_me">Remember Me</string>
     <string name="fab_create_folder">Create Folder</string>
     <string name="fab_add_file">Add File</string>
+    <string name="menu_download">Download</string>
+    <string name="menu_upload">Upload</string>
+    <string name="menu_delete_client">Delete from client</string>
+    <string name="menu_delete_server">Delete from server</string>
+    <string name="change_user_title">Change User</string>
 </resources>

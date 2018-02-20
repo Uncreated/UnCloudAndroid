@@ -2,6 +2,8 @@ package com.uncreated.uncloud.client;
 
 import android.app.Application;
 
+import com.google.gson.Gson;
+
 public class App
 		extends Application
 {

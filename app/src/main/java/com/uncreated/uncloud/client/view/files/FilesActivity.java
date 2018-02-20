@@ -171,7 +171,7 @@ public class FilesActivity
 		}
 	}
 
-	public void onOpenDialog(FNode fNode)
+	public void openDialog(FNode fNode)
 	{
 		DialogControls dialogControls = new DialogControls(this, fNode);
 		dialogControls.setOnClickDownload(view ->

@@ -1,19 +1,25 @@
 package com.uncreated.uncloud.client;
 
+import com.google.gson.Gson;
 import com.uncreated.uncloud.client.view.ClientView;
+import com.uncreated.uncloud.client.view.auth.AuthController;
+import com.uncreated.uncloud.client.view.auth.AuthView;
 import com.uncreated.uncloud.common.filestorage.FNode;
 import com.uncreated.uncloud.common.filestorage.FileNode;
 import com.uncreated.uncloud.common.filestorage.FileTransfer;
 import com.uncreated.uncloud.common.filestorage.FolderNode;
 import com.uncreated.uncloud.common.filestorage.Storage;
+import com.uncreated.uncloud.server.auth.User;
 
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class ClientController
+		implements AuthController
 {
 	private Storage storage;
 
@@ -25,8 +31,13 @@ public class ClientController
 
 	private String rootFolder;
 
+	private Gson gson;
+
+	AuthView authView;
+
 	public ClientController(String rootFolder)
 	{
+		gson = new Gson();
 		requestHandler = new RequestHandler();
 		storage = new Storage(rootFolder);
 		this.rootFolder = rootFolder;
@@ -42,6 +53,102 @@ public class ClientController
 		new Thread(r).start();
 	}
 
+
+	AuthInfBox authInfBox;
+	String selLogin;
+
+	@Override
+	public void attach(AuthView authView)
+	{
+		this.authView = authView;
+		String json = authView.getJsonAuthInf();
+		try
+		{
+			authInfBox = gson.fromJson(json, AuthInfBox.class);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		if (authInfBox == null)
+		{
+			authInfBox = new AuthInfBox();
+		}
+		selLogin = authInfBox.getLastLogin();
+		authView.setUsers(authInfBox.getMap().keySet());
+		if (selLogin != null)
+		{
+			authView.selectUser(selLogin);
+		}
+	}
+
+	@Override
+	public void selectUser(String login)
+	{
+		selLogin = login;
+		authView.selectUser(login);
+	}
+
+	@Override
+	public void auth()
+	{
+		if (selLogin == null)
+		{
+			authView.onRequestIncorrect();
+			return;
+		}
+		AuthInf authInf = authInfBox.getMap().get(selLogin);
+
+		runThread(() ->
+		{
+			RequestStatus<String> requestStatus = requestHandler.auth(authInf.getAccessToken());
+			if (!requestStatus.isOk())
+			{
+				auth(authInf.getUser());
+			}
+			else
+			{
+				authCall(requestStatus, authInf);
+			}
+		});
+	}
+
+	private void auth(User user)
+	{
+		AuthInf authInf = new AuthInf();
+		authInf.setUser(user);
+		RequestStatus<String> requestStatus = requestHandler.auth(authInf.getUser());
+		authCall(requestStatus, authInf);
+	}
+
+	@Override
+	public void auth(String login, String password)
+	{
+		runThread(() ->
+		{
+			auth(new User(login, password));
+		});
+	}
+
+	private void authCall(RequestStatus<String> requestStatus, AuthInf authInf)
+	{
+		call(() ->
+		{
+			if (requestStatus.isOk())
+			{
+				authInf.setAccessToken(requestStatus.getData());
+				authInfBox.getMap().put(authInf.getUser().getLogin(), authInf);
+				authInfBox.setLastLogin(authInf.getUser().getLogin());
+				authView.setJsonAuthInf(gson.toJson(authInfBox));
+				authView.onAuthOk();
+			}
+			else
+			{
+				authView.onRequestIncorrect();
+			}
+		});
+	}
+
 	public void register(String login, String password)
 	{
 		runThread(() ->
@@ -49,7 +156,10 @@ public class ClientController
 			RequestStatus requestStatus = requestHandler.register(login, password);
 			call(() ->
 			{
-				clientView.onRegister(requestStatus);
+				if(requestStatus.isOk())
+					authView.onRegisterOk();
+				else
+					authView.onRequestIncorrect();
 			});
 		});
 	}
@@ -73,11 +183,11 @@ public class ClientController
 		return requestStatus;
 	}
 
-	public void auth(String login, String password)
+	/*public void auth(User user)
 	{
 		runThread(() ->
 		{
-			RequestStatus requestStatus = requestHandler.auth(login, password);
+			RequestStatus requestStatus = requestHandler.auth(user);
 			call(() ->
 			{
 				clientView.onAuth(requestStatus);
@@ -89,7 +199,7 @@ public class ClientController
 				//folderUpdateRequestResult(requestStatus);
 			}
 		});
-	}
+	}*/
 
 	public void updateFiles()
 	{
@@ -348,6 +458,68 @@ public class ClientController
 		if (clientView != null)
 		{
 			clientView.call(runnable);
+		}
+	}
+
+
+	private class AuthInfBox
+	{
+		private HashMap<String, AuthInf> authInfMap;
+		private String lastLogin;
+
+		public AuthInfBox()
+		{
+			authInfMap = new HashMap<>();
+		}
+
+		public HashMap<String, AuthInf> getMap()
+		{
+			return authInfMap;
+		}
+
+		public void setMap(HashMap<String, AuthInf> authInfMap)
+		{
+			this.authInfMap = authInfMap;
+		}
+
+		public String getLastLogin()
+		{
+			return lastLogin;
+		}
+
+		public void setLastLogin(String lastLogin)
+		{
+			this.lastLogin = lastLogin;
+		}
+	}
+
+	private class AuthInf
+	{
+		private User user;
+		private String accessToken;
+
+		public AuthInf()
+		{
+		}
+
+		public User getUser()
+		{
+			return user;
+		}
+
+		public void setUser(User user)
+		{
+			this.user = user;
+		}
+
+		public String getAccessToken()
+		{
+			return accessToken;
+		}
+
+		public void setAccessToken(String accessToken)
+		{
+			this.accessToken = accessToken;
 		}
 	}
 }

@@ -76,7 +76,7 @@ public class FilesAdapter
 				}
 			}
 			FNode fNode = files.get(pos);
-			filesActivity.onOpenDialog(fNode);
+			filesActivity.openDialog(fNode);
 			return true;
 		});
 		return new ViewHolder(v);

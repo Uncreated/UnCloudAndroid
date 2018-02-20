@@ -28,7 +28,7 @@ class RequestHandler
 	private static final String API_URL = "http://192.168.7.102:8080/api/";
 	private static final RestTemplate restTemplate = new RestTemplate();
 
-	private Session session;
+	private String accessToken;
 
 	RequestStatus register(String login, String password)
 	{
@@ -45,20 +45,36 @@ class RequestHandler
 		}
 	}
 
-	RequestStatus auth(String login, String password)
+	RequestStatus<String> auth(User user)
 	{
 		Request request = new Request("auth", HttpMethod.POST);
 		try
 		{
-			session = request.go(new User(login, password), Session.class);
-			return new RequestStatus(true);
+			accessToken = request.go(user, Session.class).getAccessToken();
+			return new RequestStatus<String>(true).setData(accessToken);
 		}
 		catch (RequestException e)
 		{
 			e.printStackTrace();
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatus<>(false, e.getMessage());
 		}
+	}
 
+	RequestStatus<String> auth(String accessToken)
+	{
+		Request request = new Request("auth", HttpMethod.PUT);
+		try
+		{
+			this.accessToken = accessToken;
+			this.accessToken = request.go(Session.class).getAccessToken();
+			return new RequestStatus<String>(true).setData(this.accessToken);
+		}
+		catch (RequestException e)
+		{
+			e.printStackTrace();
+			this.accessToken = null;
+			return new RequestStatus<>(false, e.getMessage());
+		}
 	}
 
 	RequestStatus<FolderNode> files()
@@ -185,9 +201,9 @@ class RequestHandler
 
 				MediaType mediaType = new MediaType("application", "json", StandardCharsets.UTF_8);
 				httpHeaders.setContentType(mediaType);
-				if (session != null)
+				if (accessToken != null)
 				{
-					httpHeaders.set("Authorization", session.getAccessToken());
+					httpHeaders.set("Authorization", accessToken);
 				}
 
 				HttpEntity<REQ> entity = new HttpEntity<>(req, httpHeaders);

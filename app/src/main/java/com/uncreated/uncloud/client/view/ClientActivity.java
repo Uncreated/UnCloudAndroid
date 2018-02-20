@@ -41,7 +41,7 @@ public abstract class ClientActivity
 	}
 
 	@Override
-	public void onAuth(RequestStatus requestStatus)
+	public void onAuth(RequestStatus<String> requestStatus)
 	{
 		reqStatus("onAuth", requestStatus);
 	}

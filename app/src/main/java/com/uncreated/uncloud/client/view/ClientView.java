@@ -7,7 +7,7 @@ public interface ClientView
 {
 	void onRegister(RequestStatus requestStatus);
 
-	void onAuth(RequestStatus requestStatus);
+	void onAuth(RequestStatus<String> requestStatus);
 
 	void onUpdateFiles(FolderNode mergedFiles);
 
