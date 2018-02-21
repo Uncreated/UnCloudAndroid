@@ -6,9 +6,13 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,6 +21,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.uncreated.uncloud.AboutActivity;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.ActivityView;
 import com.uncreated.uncloud.client.files.FileInfo;
@@ -27,7 +32,7 @@ import java.util.ArrayList;
 
 public class FilesActivity
 		extends ActivityView<FilesController>
-		implements FilesView
+		implements FilesView, NavigationView.OnNavigationItemSelectedListener
 {
 	private RecyclerView recyclerView;
 	private FloatingActionsMenu floatingActionsMenu;
@@ -39,6 +44,18 @@ public class FilesActivity
 		setContentView(R.layout.activity_files);
 
 		setController(app.getFilesController());
+
+		Toolbar toolbar = findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+
+		DrawerLayout drawer = findViewById(R.id.drawer_layout);
+		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+				this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+		drawer.addDrawerListener(toggle);
+		toggle.syncState();
+
+		NavigationView navigationView = findViewById(R.id.nav_view);
+		navigationView.setNavigationItemSelectedListener(this);
 
 		recyclerView = findViewById(R.id.recyclerView);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -127,7 +144,7 @@ public class FilesActivity
 	{
 		floatingActionsMenu.collapse();
 
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
 		dialogBuilder.setTitle("Create Folder");
 		dialogBuilder.setMessage("Enter folder name:");
 
@@ -205,46 +222,54 @@ public class FilesActivity
 	@Override
 	public void onBackPressed()
 	{
-		if (firstClickOnBack)
+
+		DrawerLayout drawer = findViewById(R.id.drawer_layout);
+		if (drawer.isDrawerOpen(GravityCompat.START))
 		{
-			Intent intent = new Intent(Intent.ACTION_MAIN);
-			intent.addCategory(Intent.CATEGORY_HOME);
-			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivity(intent);
+			drawer.closeDrawer(GravityCompat.START);
 		}
 		else
 		{
-			news("Click again to exit the app");
-			firstClickOnBack = true;
-			new Handler().postDelayed(() ->
+			if (firstClickOnBack)
 			{
-				firstClickOnBack = false;
-			}, 2000);
+				Intent intent = new Intent(Intent.ACTION_MAIN);
+				intent.addCategory(Intent.CATEGORY_HOME);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+			}
+			else
+			{
+				news("Click again to exit the app");
+				firstClickOnBack = true;
+				new Handler().postDelayed(() ->
+				{
+					firstClickOnBack = false;
+				}, 2000);
+			}
 		}
 	}
 
-	public void onLogout()
-	{
-		finish();
-	}
-
+	@SuppressWarnings("StatementWithEmptyBody")
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
+	public boolean onNavigationItemSelected(MenuItem item)
 	{
-		getMenuInflater().inflate(R.menu.actionbar_menu, menu);
-		return true;
-	}
+		int id = item.getItemId();
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		switch (item.getItemId())
+		if (id == R.id.nav_settings)
 		{
-			case R.id.menu_logout:
-				onLogout();
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
+			//startActivity(new Intent(this, SettingsActivity.class));
 		}
+		else if (id == R.id.nav_logout)
+		{
+			finish();
+		}
+		else if (id == R.id.nav_about)
+		{
+			startActivity(new Intent(this, AboutActivity.class));
+		}
+
+		DrawerLayout drawer = findViewById(R.id.drawer_layout);
+		drawer.closeDrawer(GravityCompat.START);
+		return true;
 	}
 }

@@ -50,17 +50,11 @@ public abstract class ActivityView<T extends Controller>
 	protected void showLoading()
 	{
 		alertDialog.show();
-
-		/*getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-				WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);*/
 	}
 
 	protected void hideLoading()
 	{
 		alertDialog.hide();
-
-
-		//getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 	}
 
 	protected void setController(T controller)

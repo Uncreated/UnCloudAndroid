@@ -26,6 +26,8 @@ public class FilesController
 
 	private FolderNode curFolder;
 
+	private boolean firstRequest = true;
+
 	public FilesController(RequestHandler requestHandler, String rootFolder)
 	{
 		super(requestHandler);
@@ -39,7 +41,11 @@ public class FilesController
 	{
 		super.onAttach(filesView);
 
-		updateFiles();
+		if (firstRequest)
+		{
+			updateFiles();
+			firstRequest = false;
+		}
 	}
 
 	public void updateFiles()
@@ -158,24 +164,6 @@ public class FilesController
 		}
 		return requestStatus;
 	}
-
-	/*public void auth(User user)
-	{
-		runThread(() ->
-		{
-			RequestStatus requestStatus = requestHandler.auth(user);
-			call(() ->
-			{
-				clientView.onAuth(requestStatus);
-			});
-
-			if (requestStatus.isOk())
-			{
-				this.login = login;
-				//folderUpdateRequestResult(requestStatus);
-			}
-		});
-	}*/
 
 	public void copyFile(File source)
 	{

@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">UnCloud</string>
 
-    <string name="menu_logout">Logout</string>
-
     <string name="edit_text_hint_login">Login</string>
     <string name="edit_text_hint_password">Password</string>
 
@@ -17,4 +15,14 @@
     <string name="menu_delete_server">Delete from server</string>
     <string name="change_user_title">Change User</string>
     <string name="loading">Loading...</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_logout">Logout</string>
+    <string name="about_uncloud">About UnCloud</string>
+    <string name="about_text">Author: Elfimov Alexey</string>
 </resources>

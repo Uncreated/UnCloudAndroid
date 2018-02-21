@@ -175,14 +175,14 @@ public class RequestHandler
 
 		private <RESP, REQ> RESP go(REQ req, Class<RESP> tClass) throws RequestException
 		{
-			try
+			/*try
 			{
 				Thread.sleep(5000);
 			}
 			catch (InterruptedException e)
 			{
 				e.printStackTrace();
-			}
+			}*/
 			for (int i = 0; i < TRY_COUNT; i++)
 			{
 				try

@@ -21,7 +21,6 @@ public abstract class Controller<T extends View>
 		if (lastRunnable != null)
 		{
 			view.call(lastRunnable);
-			lastRunnable = null;
 		}
 	}
 
@@ -32,13 +31,10 @@ public abstract class Controller<T extends View>
 
 	protected synchronized void call(Runnable runnable)
 	{
+		lastRunnable = runnable;
 		if (view != null)
 		{
 			view.call(runnable);
-		}
-		else
-		{
-			lastRunnable = runnable;
 		}
 	}
 

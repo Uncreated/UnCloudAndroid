@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.uncreated.uncloud.client.files.view.FilesActivity"
+    tools:showIn="@layout/app_bar_files">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionsMenu
+            android:id="@+id/fabMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="16dp"
+            app:fab_addButtonColorNormal="#2a7fb8"
+            app:fab_addButtonColorPressed="#226693"
+            app:fab_addButtonPlusIconColor="#c4d6e2"
+            app:fab_labelStyle="@style/fab_menu_label_style">
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/createFolder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onCreateFolderClick"
+                app:fab_colorNormal="#2a7fb8"
+                app:fab_colorPressed="#226693"
+                app:fab_icon="@drawable/create_folder"
+                app:fab_size="normal"
+                app:fab_title="@string/fab_create_folder"/>
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/addFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onAddFileClick"
+                app:fab_colorNormal="#2a7fb8"
+                app:fab_colorPressed="#226693"
+                app:fab_icon="@drawable/add_file"
+                app:fab_size="normal"
+                app:fab_title="@string/fab_add_file"/>
+
+        </com.getbase.floatingactionbutton.FloatingActionsMenu>
+    </RelativeLayout>
+</FrameLayout>

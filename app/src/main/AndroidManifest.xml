@@ -21,7 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".client.files.view.FilesActivity">
+        <activity
+            android:name=".client.files.view.FilesActivity"
+            android:theme="@style/CloudTheme.NoActionBar"/>
+        <activity android:name=".AboutActivity">
         </activity>
     </application>
 
