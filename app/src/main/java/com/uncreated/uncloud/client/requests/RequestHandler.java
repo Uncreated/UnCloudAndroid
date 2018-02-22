@@ -25,7 +25,7 @@ import java.util.ArrayList;
 public class RequestHandler
 {
 	private static final int TRY_COUNT = 3;
-	private static final String API_URL = "http://192.168.1.43:8080/api/";
+	private static final String API_URL = "http://10.0.2.2:8080/api/";
 	private static final RestTemplate restTemplate = new RestTemplate();
 
 	private String accessToken;
@@ -175,14 +175,6 @@ public class RequestHandler
 
 		private <RESP, REQ> RESP go(REQ req, Class<RESP> tClass) throws RequestException
 		{
-			/*try
-			{
-				Thread.sleep(5000);
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}*/
 			for (int i = 0; i < TRY_COUNT; i++)
 			{
 				try

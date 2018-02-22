@@ -24,7 +24,6 @@ public class FilesAdapter
 	public FilesAdapter(FilesActivity filesActivity, RecyclerView recyclerView, ArrayList<FileInfo> files, boolean back)
 	{
 		this.files = files;
-
 		this.filesActivity = filesActivity;
 		this.recyclerView = recyclerView;
 		this.back = back;

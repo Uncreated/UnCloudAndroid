@@ -27,6 +27,11 @@ public class AuthController
 		this.requestHandler = requestHandler;
 	}
 
+	public String getSelLogin()
+	{
+		return selLogin;
+	}
+
 	@Override
 	public synchronized void onAttach(AuthView authView)
 	{

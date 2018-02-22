@@ -43,6 +43,8 @@ public class FilesActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_files);
 
+		news("onCreate");
+
 		setController(app.getFilesController());
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
@@ -247,6 +249,13 @@ public class FilesActivity
 				}, 2000);
 			}
 		}
+	}
+
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		news("onDestroy");
 	}
 
 	@SuppressWarnings("StatementWithEmptyBody")

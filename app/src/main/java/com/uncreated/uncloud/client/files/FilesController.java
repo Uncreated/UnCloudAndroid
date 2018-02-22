@@ -15,13 +15,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FilesController
 		extends Controller<FilesView>
 {
 	private Storage storage;
 	private FolderNode mergedFolder;
-	private String login = "debug_login";
+	private String login;
 	private String rootFolder;
 
 	private FolderNode curFolder;
@@ -34,6 +35,11 @@ public class FilesController
 
 		storage = new Storage(rootFolder);
 		this.rootFolder = rootFolder;
+	}
+
+	public void setLogin(String login)
+	{
+		this.login = login;
 	}
 
 	@Override
@@ -126,6 +132,7 @@ public class FilesController
 			if (requestStatus.isOk())
 			{
 				curFolder = mergedFolder.goTo(curFolder != null ? curFolder.getFilePath() : "/");
+				mergedFolder.sort();
 			}
 		}
 
@@ -165,29 +172,40 @@ public class FilesController
 		return requestStatus;
 	}
 
-	public void copyFile(File source)
+	public void copyFile(List<File> fileList)
+	{
+		if (fileList != null && fileList.size() > 0)
+		{
+			copyFile(fileList.toArray(new File[fileList.size()]));
+		}
+	}
+
+	public void copyFile(File... files)
 	{
 		runThread(() ->
 		{
-			RequestStatus requestStatus;
-			try
+			RequestStatus requestStatus = null;
+			for (File source : files)
 			{
-				File dest = new File(rootFolder + login + curFolder.getFilePath() + source.getName());
-				dest.getParentFile().mkdirs();
-				if (source.isDirectory())
+				try
 				{
-					FileUtils.copyDirectory(source, dest);
+					File dest = new File(rootFolder + login + curFolder.getFilePath() + source.getName());
+					dest.getParentFile().mkdirs();
+					if (source.isDirectory())
+					{
+						FileUtils.copyDirectory(source, dest);
+					}
+					else
+					{
+						FileUtils.copyFile(source, dest);
+					}
+					requestStatus = new RequestStatus(true);
 				}
-				else
+				catch (IOException e)
 				{
-					FileUtils.copyFile(source, dest);
+					e.printStackTrace();
+					requestStatus = new RequestStatus(false, e.getMessage());
 				}
-				requestStatus = new RequestStatus(true);
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				requestStatus = new RequestStatus(false, e.getMessage());
 			}
 			folderUpdateRequestResult(requestStatus);
 		});
@@ -198,7 +216,7 @@ public class FilesController
 		RequestStatus requestStatus = null;
 		String path = fileNode.getFilePath();
 		int parts = fileNode.getParts();
-		for (int i = 0; i < parts; i++)
+		for (int i = 0; i < parts || i == 0; i++)
 		{
 			RequestStatus<FileTransfer> requestStatusPart = requestHandler.downloadFilePart(path, i);
 			if (requestStatusPart.isOk())
@@ -278,7 +296,7 @@ public class FilesController
 		String path = fileNode.getFilePath();
 		int szi = fileNode.getParts();
 		File file = new File(rootFolder + login + path);
-		for (int i = 0; i < szi; i++)
+		for (int i = 0; i < szi || i == 0; i++)
 		{
 			FileTransfer fileTransfer = new FileTransfer(path, i, FileTransfer.getSizeOfPart(fileNode.getSize(), i));
 			try

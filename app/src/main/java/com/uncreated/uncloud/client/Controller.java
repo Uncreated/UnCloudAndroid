@@ -29,6 +29,11 @@ public abstract class Controller<T extends View>
 		this.view = null;
 	}
 
+	public void clear()
+	{
+		lastRunnable = null;
+	}
+
 	protected synchronized void call(Runnable runnable)
 	{
 		lastRunnable = runnable;

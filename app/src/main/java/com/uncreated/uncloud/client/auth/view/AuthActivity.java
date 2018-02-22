@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.method.KeyListener;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -156,6 +155,8 @@ public class AuthActivity
 	@Override
 	public void onAuthOk()
 	{
+		controller.clear();
+		app.getFilesController().setLogin(controller.getSelLogin());
 		Intent intent = new Intent(this, FilesActivity.class);
 		startActivity(intent);
 		hideLoading();
