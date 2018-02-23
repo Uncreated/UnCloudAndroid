@@ -16,7 +16,7 @@ public interface AuthView
 	void selectUser(String login, boolean autoAuth);
 
 	//response
-	void onAuthOk();
+	void onAuthOk(String login);
 
 	void onRegisterOk();
 

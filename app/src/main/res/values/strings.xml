@@ -14,7 +14,7 @@
     <string name="menu_delete_client">Delete from client</string>
     <string name="menu_delete_server">Delete from server</string>
     <string name="change_user_title">Change User</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading&#8230;</string>
     <string name="title_activity_main">MainActivity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -25,4 +25,6 @@
     <string name="menu_logout">Logout</string>
     <string name="about_uncloud">About UnCloud</string>
     <string name="about_text">Author: Elfimov Alexey</string>
+
+    <string name="menu_home">Home</string>
 </resources>

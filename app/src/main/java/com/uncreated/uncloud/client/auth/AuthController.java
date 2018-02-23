@@ -114,7 +114,7 @@ public class AuthController
 				authInfBox.getMap().put(authInf.getUser().getLogin(), authInf);
 				authInfBox.setLastLogin(authInf.getUser().getLogin());
 				view.setJsonAuthInf(gson.toJson(authInfBox));
-				view.onAuthOk();
+				view.onAuthOk(authInf.getUser().getLogin());
 			}
 			else
 			{

@@ -1,6 +1,7 @@
 package com.uncreated.uncloud.client;
 
 import android.app.AlertDialog;
+import android.content.ComponentCallbacks;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;

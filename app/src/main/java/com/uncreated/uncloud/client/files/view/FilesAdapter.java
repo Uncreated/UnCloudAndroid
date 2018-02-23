@@ -17,14 +17,14 @@ public class FilesAdapter
 		extends RecyclerView.Adapter<FilesAdapter.ViewHolder>
 {
 	private List<FileInfo> files;
-	private FilesActivity filesActivity;
+	private FilesFragment filesFragment;
 	private RecyclerView recyclerView;
 	private boolean back;
 
-	public FilesAdapter(FilesActivity filesActivity, RecyclerView recyclerView, ArrayList<FileInfo> files, boolean back)
+	public FilesAdapter(FilesFragment filesFragment, RecyclerView recyclerView, ArrayList<FileInfo> files, boolean back)
 	{
 		this.files = files;
-		this.filesActivity = filesActivity;
+		this.filesFragment = filesFragment;
 		this.recyclerView = recyclerView;
 		this.back = back;
 	}
@@ -35,11 +35,11 @@ public class FilesAdapter
 		View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_item, parent, false);
 		v.setOnClickListener(view ->
 		{
-			filesActivity.onClickFile(get(v));
+			filesFragment.onClickFile(get(v));
 		});
 		v.setOnLongClickListener(view ->
 		{
-			filesActivity.onLongClickFile(get(v));
+			filesFragment.onLongClickFile(get(v));
 			return true;
 		});
 		return new ViewHolder(v);

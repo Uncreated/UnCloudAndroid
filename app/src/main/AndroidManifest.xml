@@ -22,10 +22,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".client.files.view.FilesActivity"
+            android:name=".client.files.view.MainActivity"
             android:theme="@style/CloudTheme.NoActionBar"/>
-        <activity android:name=".AboutActivity">
-        </activity>
     </application>
 
 </manifest>

@@ -14,7 +14,7 @@ import android.widget.EditText;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.ActivityView;
 import com.uncreated.uncloud.client.auth.AuthController;
-import com.uncreated.uncloud.client.files.view.FilesActivity;
+import com.uncreated.uncloud.client.files.view.MainActivity;
 
 import java.util.Set;
 
@@ -24,6 +24,8 @@ public class AuthActivity
 {
 	private static final String PREF_KEY_AUTH = "prefKeyAuthActivity";
 	private static final String KEY_AUTH_INF = "keyAuthInf";
+
+	public static final String KEY_LOGIN = "loginKey";
 
 	private EditText loginEditText;
 	private EditText passwordEditText;
@@ -153,11 +155,12 @@ public class AuthActivity
 	}
 
 	@Override
-	public void onAuthOk()
+	public void onAuthOk(String login)
 	{
 		controller.clear();
 		app.getFilesController().setLogin(controller.getSelLogin());
-		Intent intent = new Intent(this, FilesActivity.class);
+		Intent intent = new Intent(this, MainActivity.class);
+		intent.putExtra(KEY_LOGIN, login);
 		startActivity(intent);
 		hideLoading();
 	}
