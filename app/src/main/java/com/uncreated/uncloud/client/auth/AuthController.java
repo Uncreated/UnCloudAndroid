@@ -127,7 +127,7 @@ public class AuthController
 	{
 		runThread(() ->
 		{
-			RequestStatus requestStatus = requestHandler.register(login, password);
+			RequestStatus requestStatus = requestHandler.register(new User(login, password));
 			call(() ->
 			{
 				if (requestStatus.isOk())

@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.files.view;
+package com.uncreated.uncloud.client.main.view;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.files.FileInfo;
+import com.uncreated.uncloud.client.main.FileInfo;
 
 import java.util.ArrayList;
 import java.util.List;

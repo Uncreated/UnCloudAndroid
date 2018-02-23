@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.files.view;
+package com.uncreated.uncloud.client.main.view;
 
 import android.app.Fragment;
 import android.content.Intent;

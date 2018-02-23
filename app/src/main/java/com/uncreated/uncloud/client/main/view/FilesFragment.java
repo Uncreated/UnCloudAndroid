@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.files.view;
+package com.uncreated.uncloud.client.main.view;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,14 +22,10 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.App;
 import com.uncreated.uncloud.client.auth.view.AuthActivity;
-import com.uncreated.uncloud.client.files.FileInfo;
-import com.uncreated.uncloud.client.files.FilesController;
+import com.uncreated.uncloud.client.main.FileInfo;
+import com.uncreated.uncloud.client.main.FilesController;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
@@ -57,7 +54,10 @@ public class FilesFragment
 		super.onCreate(savedInstanceState);
 
 		controller = ((App) getActivity().getApplication()).getFilesController();
-		controller.setLogin(getActivity().getIntent().getStringExtra(AuthActivity.KEY_LOGIN));
+		String login = getActivity().getIntent().getStringExtra(AuthActivity.KEY_LOGIN);
+		Log.d("fileFramgent: login = ", login);
+		controller.setLogin(login);
+
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setView(R.layout.loading_dialog);

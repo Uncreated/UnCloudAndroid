@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.files.view;
+package com.uncreated.uncloud.client.main.view;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -9,10 +9,10 @@ import android.view.ViewGroup;
 
 import com.uncreated.uncloud.R;
 
-public class AboutFragment
+public class SettingsFragment
 		extends Fragment
 {
-	public AboutFragment()
+	public SettingsFragment()
 	{
 
 	}
@@ -27,7 +27,7 @@ public class AboutFragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState)
 	{
-		return inflater.inflate(R.layout.fragment_about, container, false);
+		return inflater.inflate(R.layout.fragment_settings, container, false);
 	}
 
 	@Override

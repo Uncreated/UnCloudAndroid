@@ -3,7 +3,7 @@ package com.uncreated.uncloud.client;
 import android.app.Application;
 
 import com.uncreated.uncloud.client.auth.AuthController;
-import com.uncreated.uncloud.client.files.FilesController;
+import com.uncreated.uncloud.client.main.FilesController;
 import com.uncreated.uncloud.client.requests.RequestHandler;
 
 public class App

@@ -1,44 +1,53 @@
 package com.uncreated.uncloud.client.requests;
 
-import com.uncreated.uncloud.common.RequestException;
-import com.uncreated.uncloud.common.filestorage.FileNode;
 import com.uncreated.uncloud.common.filestorage.FileTransfer;
 import com.uncreated.uncloud.common.filestorage.FolderNode;
 import com.uncreated.uncloud.server.auth.Session;
 import com.uncreated.uncloud.server.auth.User;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.io.IOException;
+
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RequestHandler
 {
-	private static final int TRY_COUNT = 3;
-	private static final String API_URL = "http://10.0.2.2:8080/api/";
+	private static final String SERVER_URL = "http://10.0.2.2:8080/";
 	private static final RestTemplate restTemplate = new RestTemplate();
+
+	private static UnCloudApi unCloudApi;
+	private Retrofit retrofit;
 
 	private String accessToken;
 
-	public RequestStatus register(String login, String password)
+	public RequestHandler()
 	{
-		Request request = new Request("register", HttpMethod.POST);
+		retrofit = new Retrofit.Builder()
+				.baseUrl(SERVER_URL)
+				.addConverterFactory(GsonConverterFactory.create())
+				.build();
+
+		unCloudApi = retrofit.create(UnCloudApi.class);
+	}
+
+	public RequestStatus register(User user)
+	{
 		try
 		{
-			request.go(new User(login, password), String.class);
-			return new RequestStatus(true);
+			Response response = unCloudApi.postRegister(user).execute();
+			if (response.isSuccessful())
+			{
+				return new RequestStatus(true);
+			}
+			else
+			{
+				return new RequestStatus(false, response.code() + "");
+			}
 		}
-		catch (RequestException e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
 			return new RequestStatus(false, e.getMessage());
@@ -47,13 +56,20 @@ public class RequestHandler
 
 	public RequestStatus<String> auth(User user)
 	{
-		Request request = new Request("auth", HttpMethod.POST);
 		try
 		{
-			accessToken = request.go(user, Session.class).getAccessToken();
-			return new RequestStatus<String>(true).setData(accessToken);
+			Response<Session> response = unCloudApi.postAuth(user).execute();
+			accessToken = response.body().getAccessToken();
+			if (response.isSuccessful())
+			{
+				return new RequestStatus<String>(true).setData(accessToken);
+			}
+			else
+			{
+				return new RequestStatus<>(false, response.code() + "");
+			}
 		}
-		catch (RequestException e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
 			return new RequestStatus<>(false, e.getMessage());
@@ -62,78 +78,105 @@ public class RequestHandler
 
 	public RequestStatus<String> auth(String accessToken)
 	{
-		Request request = new Request("auth", HttpMethod.PUT);
+		this.accessToken = null;
 		try
 		{
-			this.accessToken = accessToken;
-			this.accessToken = request.go(Session.class).getAccessToken();
-			return new RequestStatus<String>(true).setData(this.accessToken);
+			Response<Session> response = unCloudApi.putAuth(accessToken).execute();
+			if (response.isSuccessful())
+			{
+				this.accessToken = response.body().getAccessToken();
+				return new RequestStatus<String>(true).setData(this.accessToken);
+			}
+			else
+			{
+				return new RequestStatus<>(false, response.code() + "");
+			}
 		}
-		catch (RequestException e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
-			this.accessToken = null;
 			return new RequestStatus<>(false, e.getMessage());
 		}
 	}
 
 	public RequestStatus<FolderNode> files()
 	{
-		Request request = new Request("files", HttpMethod.GET);
 		try
 		{
-			FolderNode folderNode = request.go(FolderNode.class);
-			return new RequestStatus<FolderNode>(true).setData(folderNode);
+			Response<FolderNode> response = unCloudApi.getFiles(accessToken).execute();
+			if (response.isSuccessful())
+			{
+				return new RequestStatus<FolderNode>(true).setData(response.body());
+			}
+			else
+			{
+				return new RequestStatus<>(false, response.code() + "");
+			}
 		}
-		catch (RequestException e)
-		{
-			e.printStackTrace();
-			return new RequestStatus<FolderNode>(false, e.getMessage());
-		}
-	}
-
-	public RequestStatus<FileTransfer> downloadFilePart(String path, Integer part)
-	{
-		Request request = new Request("file", HttpMethod.GET);
-		request.add("part", part.toString());
-		request.add("path", path);
-		try
-		{
-			FileTransfer fileTransfer = request.go(FileTransfer.class);
-			return new RequestStatus<FileTransfer>(true).setData(fileTransfer);
-		}
-		catch (RequestException e)
-		{
-			e.printStackTrace();
-			return new RequestStatus<FileTransfer>(false, e.getMessage());
-		}
-	}
-
-	public RequestStatus<FileNode> removeFile(String path)
-	{
-		Request request = new Request("file", HttpMethod.DELETE);
-		request.add("path", path);
-		try
-		{
-			request.go(String.class);
-			return new RequestStatus<>(true);
-		}
-		catch (RequestException e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
 			return new RequestStatus<>(false, e.getMessage());
 		}
 	}
 
-	public RequestStatus setFile(FileTransfer fileTransfer)
+	public RequestStatus<FileTransfer> downloadFilePart(String path, Integer part)
 	{
-		Request request = new Request("file", HttpMethod.POST);
 		try
 		{
-			request.go(fileTransfer, String.class);
-			return new RequestStatus(true);
+			Response<FileTransfer> response = unCloudApi.getFile(accessToken, path, part).execute();
+			if (response.isSuccessful())
+			{
+				return new RequestStatus<FileTransfer>(true).setData(response.body());
+			}
+			else
+			{
+				return new RequestStatus<>(false, response.code() + "");
+			}
 		}
-		catch (RequestException e)
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return new RequestStatus<>(false, e.getMessage());
+		}
+	}
+
+	public RequestStatus removeFile(String path)
+	{
+		try
+		{
+			Response response = unCloudApi.deleteFile(accessToken, path).execute();
+			if (response.isSuccessful())
+			{
+				return new RequestStatus(true);
+			}
+			else
+			{
+				return new RequestStatus(false, response.code() + "");
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return new RequestStatus(false, e.getMessage());
+		}
+	}
+
+	public RequestStatus setFile(FileTransfer fileTransfer)
+	{
+		try
+		{
+			Response response = unCloudApi.postFile(accessToken, fileTransfer).execute();
+			if (response.isSuccessful())
+			{
+				return new RequestStatus(true);
+			}
+			else
+			{
+				return new RequestStatus<>(false, response.code() + "");
+			}
+		}
+		catch (IOException e)
 		{
 			e.printStackTrace();
 			return new RequestStatus(false, e.getMessage());
@@ -142,141 +185,22 @@ public class RequestHandler
 
 	public RequestStatus createFolder(String path)
 	{
-		Request request = new Request("folder", HttpMethod.POST);
-		request.add("path", path);
 		try
 		{
-			request.go(FileNode.class);
-			return new RequestStatus(true);
+			Response response = unCloudApi.postFolder(accessToken, path).execute();
+			if (response.isSuccessful())
+			{
+				return new RequestStatus(true);
+			}
+			else
+			{
+				return new RequestStatus<>(false, response.code() + "");
+			}
 		}
-		catch (RequestException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 			return new RequestStatus(false, e.getMessage());
-		}
-	}
-
-	private class Request
-	{
-		String call;
-		HttpMethod method;
-		ArrayList<Param> params = new ArrayList<>();
-
-		Request(String call, HttpMethod method)
-		{
-			this.call = call;
-			this.method = method;
-		}
-
-		private <RESP> RESP go(Class<RESP> tClass) throws RequestException
-		{
-			return go("", tClass);
-		}
-
-		private <RESP, REQ> RESP go(REQ req, Class<RESP> tClass) throws RequestException
-		{
-			for (int i = 0; i < TRY_COUNT; i++)
-			{
-				try
-				{
-					return goTry(req, tClass);
-				}
-				catch (RequestException e)
-				{
-					e.printStackTrace();
-					if (i == TRY_COUNT - 1)
-					{
-						throw e;
-					}
-				}
-			}
-			return null;
-		}
-
-		private <RESP, REQ> RESP goTry(REQ req, Class<RESP> tClass) throws RequestException
-		{
-			try
-			{
-				HttpHeaders httpHeaders = new HttpHeaders();
-
-				MediaType mediaType = new MediaType("application", "json", StandardCharsets.UTF_8);
-				httpHeaders.setContentType(mediaType);
-				if (accessToken != null)
-				{
-					httpHeaders.set("Authorization", accessToken);
-				}
-
-				HttpEntity<REQ> entity = new HttpEntity<>(req, httpHeaders);
-				try
-				{
-					return restTemplate.exchange(getUrl(), method, entity, tClass).getBody();
-				}
-				catch (HttpClientErrorException e)
-				{
-					throw new RequestException(e.getStatusText(), e.getStatusCode());
-				}
-			}
-			catch (ResourceAccessException e)
-			{
-				throw new RequestException("Connection timed out", null);
-			}
-		}
-
-		void add(String name, String value)
-		{
-			params.add(new Param(name, value));
-		}
-
-		URI getUrl()
-		{
-			StringBuilder builder = new StringBuilder();
-			builder.append(API_URL);
-			builder.append(call);
-			int szi = params.size();
-			if (szi > 0)
-			{
-				builder.append("?");
-				for (int i = 0; i < szi; i++)
-				{
-					Param param = params.get(i);
-					try
-					{
-						String value = URLEncoder.encode(param.value, "UTF-8");
-						builder.append(param.name);
-						builder.append("=");
-						builder.append(value);
-						if (i != szi - 1)
-						{
-							builder.append("&");
-						}
-					}
-					catch (UnsupportedEncodingException e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}
-			try
-			{
-				return new URI(builder.toString());
-			}
-			catch (URISyntaxException e)
-			{
-				e.printStackTrace();
-				return null;
-			}
-		}
-
-		private class Param
-		{
-			String name;
-			String value;
-
-			Param(String name, String value)
-			{
-				this.name = name;
-				this.value = value;
-			}
 		}
 	}
 }

@@ -1,7 +1,7 @@
-package com.uncreated.uncloud.client.files;
+package com.uncreated.uncloud.client.main;
 
 import com.uncreated.uncloud.client.Controller;
-import com.uncreated.uncloud.client.files.view.FilesView;
+import com.uncreated.uncloud.client.main.view.FilesView;
 import com.uncreated.uncloud.client.requests.RequestHandler;
 import com.uncreated.uncloud.client.requests.RequestStatus;
 import com.uncreated.uncloud.common.filestorage.FileNode;

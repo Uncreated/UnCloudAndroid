@@ -14,7 +14,7 @@ import android.widget.EditText;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.ActivityView;
 import com.uncreated.uncloud.client.auth.AuthController;
-import com.uncreated.uncloud.client.files.view.MainActivity;
+import com.uncreated.uncloud.client.main.view.MainActivity;
 
 import java.util.Set;
 
@@ -157,12 +157,12 @@ public class AuthActivity
 	@Override
 	public void onAuthOk(String login)
 	{
+		hideLoading();
 		controller.clear();
 		app.getFilesController().setLogin(controller.getSelLogin());
 		Intent intent = new Intent(this, MainActivity.class);
 		intent.putExtra(KEY_LOGIN, login);
 		startActivity(intent);
-		hideLoading();
 	}
 
 	@Override

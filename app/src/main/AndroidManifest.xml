@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".client.files.view.MainActivity"
+            android:name=".client.main.view.MainActivity"
             android:theme="@style/CloudTheme.NoActionBar"/>
     </application>
 

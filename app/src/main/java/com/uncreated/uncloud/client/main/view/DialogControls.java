@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.files.view;
+package com.uncreated.uncloud.client.main.view;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.files.FileInfo;
+import com.uncreated.uncloud.client.main.FileInfo;
 
 public class DialogControls
 		extends Dialog
