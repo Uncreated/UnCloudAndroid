@@ -1,7 +1,7 @@
 package com.uncreated.uncloud.client.old.main;
 
-import com.uncreated.uncloud.client.mvp.model.storage.FileNode;
-import com.uncreated.uncloud.client.mvp.model.storage.FolderNode;
+import com.uncreated.uncloud.client.model.storage.FileNode;
+import com.uncreated.uncloud.client.model.storage.FolderNode;
 
 public class FileInfo
 {

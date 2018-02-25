@@ -1,16 +1,7 @@
 package com.uncreated.uncloud.client.old.auth;
 
-import android.content.Context;
-
 import com.uncreated.uncloud.client.old.Controller;
-import com.uncreated.uncloud.client.mvp.model.api.auth.AuthApiClient;
-import com.uncreated.uncloud.client.mvp.model.api.auth.Session;
-import com.uncreated.uncloud.client.mvp.model.api.auth.User;
-import com.uncreated.uncloud.client.mvp.model.auth.AuthInf;
-import com.uncreated.uncloud.client.mvp.model.auth.AuthManager;
 import com.uncreated.uncloud.client.old.auth.view.AuthView;
-
-import retrofit2.Retrofit;
 
 public class AuthController
 		extends Controller<AuthView>

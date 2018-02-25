@@ -7,14 +7,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:name=".client.mvp.App"
+        android:name=".client.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/CloudTheme">
-        <activity android:name=".client.mvp.ui.auth.activity.AuthActivity">
+        <activity android:name=".client.auth.ui.activity.AuthActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".client.ui.activity.main.MainActivity"
+            android:name=".client.main.activity.MainActivity"
             android:theme="@style/CloudTheme.NoActionBar"/>
     </application>
 

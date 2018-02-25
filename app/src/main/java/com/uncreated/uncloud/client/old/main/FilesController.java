@@ -2,13 +2,14 @@ package com.uncreated.uncloud.client.old.main;
 
 import android.content.Context;
 
-import com.uncreated.uncloud.client.mvp.model.api.files.FilesApiClient;
-import com.uncreated.uncloud.client.mvp.model.storage.FileNode;
-import com.uncreated.uncloud.client.mvp.model.storage.FileTransfer;
-import com.uncreated.uncloud.client.mvp.model.storage.FolderNode;
-import com.uncreated.uncloud.client.mvp.model.storage.Storage;
+import com.uncreated.uncloud.client.main.fragment.files.FilesView;
+import com.uncreated.uncloud.client.model.Model;
+import com.uncreated.uncloud.client.model.api.ApiClient;
+import com.uncreated.uncloud.client.model.storage.FileNode;
+import com.uncreated.uncloud.client.model.storage.FileTransfer;
+import com.uncreated.uncloud.client.model.storage.FolderNode;
+import com.uncreated.uncloud.client.model.storage.Storage;
 import com.uncreated.uncloud.client.old.Controller;
-import com.uncreated.uncloud.client.ui.fragment.files.FilesView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,17 +30,13 @@ public class FilesController
 
 	private boolean firstRequest = true;
 
-	private FilesApiClient filesApiClient;
+	private ApiClient apiClient;
 
-	//реализуй mvp по принципу moxy
-	//View -
-	//.... - ViewState - Presenter - Model
-	//View -
 	public FilesController(Retrofit retrofit, String rootFolder)
 	{
 		storage = new Storage(rootFolder);
 
-		filesApiClient = new FilesApiClient(retrofit);
+		apiClient = Model.getInstance().getApiClient();
 	}
 
 	@Override
@@ -56,7 +53,7 @@ public class FilesController
 
 	public void updateFiles()
 	{
-		filesApiClient.updateFiles(body ->
+		apiClient.updateFiles(body ->
 		{
 			try
 			{
@@ -172,7 +169,7 @@ public class FilesController
 		{
 			try
 			{
-				FileTransfer fileTransfer = filesApiClient.getFile(path, i);
+				FileTransfer fileTransfer = apiClient.getFile(path, i);
 				if (fileTransfer == null)
 				{
 					return false;
@@ -245,7 +242,7 @@ public class FilesController
 			{
 				FileTransfer fileTransfer = new FileTransfer(path, i, FileTransfer.getSizeOfPart(fileNode.getSize(), i));
 				storage.read(fileTransfer, path);
-				if (!filesApiClient.postFile(fileTransfer))
+				if (!apiClient.postFile(fileTransfer))
 				{
 					return false;
 				}
@@ -265,7 +262,7 @@ public class FilesController
 		{
 			try
 			{
-				if (!filesApiClient.postFolder(folderNode.getFilePath()))
+				if (!apiClient.postFolder(folderNode.getFilePath()))
 				{
 					return false;
 				}
@@ -335,12 +332,12 @@ public class FilesController
 		FileNode fileNode = getFileNode(fileInfo);
 		if (fileNode != null)
 		{
-			filesApiClient.deleteFile(fileNode.getFilePath(), body -> updateFiles(), view);
+			apiClient.deleteFile(fileNode.getFilePath(), body -> updateFiles(), view);
 		}
 	}
 
 	public void createFolder(String name)
 	{
-		filesApiClient.createFolder(curFolder.getFilePath() + name, body -> updateFiles(), view);
+		apiClient.createFolder(curFolder.getFilePath() + name, body -> updateFiles(), view);
 	}
 }

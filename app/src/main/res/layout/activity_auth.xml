@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:windowSoftInputMode="stateVisible|adjustResize"
-    tools:context="com.uncreated.uncloud.client.mvp.ui.auth.activity.AuthActivity">
+    tools:context="com.uncreated.uncloud.client.auth.ui.activity.AuthActivity">
 
     <EditText
-        android:id="@+id/loginEditText"
+        android:id="@+id/login_edit_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -20,12 +20,12 @@
         android:inputType="textPersonName"
         android:textAlignment="center"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/passwordEditText"
+        app:layout_constraintBottom_toTopOf="@+id/password_edit_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
     <EditText
-        android:id="@+id/passwordEditText"
+        android:id="@+id/password_edit_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -43,29 +43,29 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <Button
-        android:id="@+id/authButton"
+        android:id="@+id/auth_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:onClick="onAuthClick"
         android:text="@string/button_auth"
-        app:layout_constraintEnd_toEndOf="@+id/passwordEditText"
-        app:layout_constraintTop_toBottomOf="@+id/passwordEditText"
-        android:textSize="24sp"/>
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="@+id/password_edit_text"
+        app:layout_constraintTop_toBottomOf="@+id/password_edit_text"/>
 
     <Button
-        android:id="@+id/registerButton"
+        android:id="@+id/register_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:onClick="onRegisterClick"
         android:text="@string/button_register"
-        app:layout_constraintStart_toStartOf="@+id/passwordEditText"
-        app:layout_constraintTop_toBottomOf="@+id/passwordEditText"
-        android:textSize="24sp"/>
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="@+id/password_edit_text"
+        app:layout_constraintTop_toBottomOf="@+id/password_edit_text"/>
 
     <Button
-        android:id="@+id/changeUserButton"
+        android:id="@+id/change_user_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"

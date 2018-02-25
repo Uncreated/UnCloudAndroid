@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.ui.fragment.files.FilesFragment;
+import com.uncreated.uncloud.client.main.fragment.files.FilesFragment;
 import com.uncreated.uncloud.client.old.main.FileInfo;
 
 import java.util.ArrayList;
