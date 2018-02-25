@@ -74,7 +74,7 @@ public class CallbackCodes<T>
 					{
 						msg = response.errorBody().string();
 					}
-					catch (IOException e)
+					catch (NullPointerException | IOException e)
 					{
 						e.printStackTrace();
 						msg = "Request error (" + response.code() + ")";

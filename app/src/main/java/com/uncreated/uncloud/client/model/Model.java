@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.uncreated.uncloud.client.model.api.ApiClient;
 import com.uncreated.uncloud.client.model.auth.AuthManager;
+import com.uncreated.uncloud.client.model.storage.Storage;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -29,10 +30,10 @@ public class Model
 
 	private final AuthManager authManager;
 	private final ApiClient apiClient;
+	private final Storage storage;
 
 	private Model(Context context)
 	{
-
 		Retrofit retrofit = new Retrofit.Builder()
 				.baseUrl(SERVER_URL)
 				.addConverterFactory(GsonConverterFactory.create())
@@ -40,6 +41,7 @@ public class Model
 
 		authManager = new AuthManager(context);
 		apiClient = new ApiClient(retrofit);
+		storage = new Storage(context.getFilesDir().getAbsolutePath());
 
 	}
 
@@ -51,5 +53,10 @@ public class Model
 	public ApiClient getApiClient()
 	{
 		return apiClient;
+	}
+
+	public Storage getStorage()
+	{
+		return storage;
 	}
 }

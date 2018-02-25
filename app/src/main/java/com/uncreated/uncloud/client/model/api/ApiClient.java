@@ -1,6 +1,6 @@
 package com.uncreated.uncloud.client.model.api;
 
-import com.uncreated.uncloud.client.main.fragment.files.FilesView;
+import com.uncreated.uncloud.client.main.ui.fragment.files.FilesView;
 import com.uncreated.uncloud.client.model.api.entity.Session;
 import com.uncreated.uncloud.client.model.api.entity.User;
 import com.uncreated.uncloud.client.model.auth.AuthInf;

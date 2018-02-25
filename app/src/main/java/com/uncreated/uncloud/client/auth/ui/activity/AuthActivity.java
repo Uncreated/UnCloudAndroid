@@ -13,9 +13,10 @@ import android.widget.Toast;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.presenter.InjectPresenter;
+import com.arellomobile.mvp.presenter.PresenterType;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.auth.presentation.AuthPresenter;
-import com.uncreated.uncloud.client.main.activity.MainActivity;
+import com.uncreated.uncloud.client.main.ui.activity.MainActivity;
 
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class AuthActivity
 
 	private AlertDialog alertDialog;
 
-	@InjectPresenter
+	@InjectPresenter(type = PresenterType.GLOBAL, tag = "AuthPresenter")
 	AuthPresenter mAuthPresenter;
 
 	@Override
@@ -164,7 +165,15 @@ public class AuthActivity
 	public void switchMainActivity()
 	{
 		Intent intent = new Intent(this, MainActivity.class);
-		startActivity(intent);
+		startActivityForResult(intent, 0);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+
+		mAuthPresenter.onBack();
 	}
 
 	public void onRegisterClick(View view)

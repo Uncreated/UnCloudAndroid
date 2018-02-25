@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.old.main.view.files;
+package com.uncreated.uncloud.client.main.ui.fragment.files;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.old.main.FileInfo;
+import com.uncreated.uncloud.client.main.presentation.FileInfo;
 
 public class DialogControls
 		extends Dialog
@@ -21,29 +21,18 @@ public class DialogControls
 	private View.OnClickListener onClickDeleteClient;
 	private View.OnClickListener onClickDeleteServer;
 
-	public DialogControls(@NonNull Context context, FileInfo fileInfo)
+	public DialogControls(@NonNull Context context, FileInfo fileInfo,
+						  View.OnClickListener onClickDownload,
+						  View.OnClickListener onClickUpload,
+						  View.OnClickListener onClickDeleteClient,
+						  View.OnClickListener onClickDeleteServer)
 	{
 		super(context);
+
 		this.fileInfo = fileInfo;
-	}
-
-	public void setOnClickDownload(View.OnClickListener onClickDownload)
-	{
 		this.onClickDownload = onClickDownload;
-	}
-
-	public void setOnClickUpload(View.OnClickListener onClickUpload)
-	{
 		this.onClickUpload = onClickUpload;
-	}
-
-	public void setOnClickDeleteClient(View.OnClickListener onClickDeleteClient)
-	{
 		this.onClickDeleteClient = onClickDeleteClient;
-	}
-
-	public void setOnClickDeleteServer(View.OnClickListener onClickDeleteServer)
-	{
 		this.onClickDeleteServer = onClickDeleteServer;
 	}
 
@@ -51,7 +40,6 @@ public class DialogControls
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		//requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.dialog_controls);
 
 		TextView textView = findViewById(R.id.title);
@@ -103,7 +91,7 @@ public class DialogControls
 	private void set(int idView, int idImage, String text, View.OnClickListener onClickListener)
 	{
 		View view = findViewById(idView);
-		ImageView imageView = view.findViewById(R.id.imageView);
+		ImageView imageView = view.findViewById(R.id.image_view);
 		imageView.setImageResource(idImage);
 		TextView textView = view.findViewById(R.id.textView);
 		textView.setText(text);

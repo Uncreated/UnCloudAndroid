@@ -1,4 +1,4 @@
-package com.uncreated.uncloud.client.old.main.view.files;
+package com.uncreated.uncloud.client.main.ui.fragment.files;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,8 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.main.fragment.files.FilesFragment;
-import com.uncreated.uncloud.client.old.main.FileInfo;
+import com.uncreated.uncloud.client.main.presentation.FileInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +132,7 @@ public class FilesAdapter
 		ViewHolder(View itemView)
 		{
 			super(itemView);
-			imageView = itemView.findViewById(R.id.imageView);
+			imageView = itemView.findViewById(R.id.image_view);
 			textView = itemView.findViewById(R.id.textView);
 		}
 	}

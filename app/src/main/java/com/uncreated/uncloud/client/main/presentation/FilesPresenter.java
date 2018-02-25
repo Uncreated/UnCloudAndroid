@@ -1,15 +1,15 @@
-package com.uncreated.uncloud.client.old.main;
+package com.uncreated.uncloud.client.main.presentation;
 
-import android.content.Context;
-
-import com.uncreated.uncloud.client.main.fragment.files.FilesView;
+import com.arellomobile.mvp.InjectViewState;
+import com.arellomobile.mvp.MvpPresenter;
+import com.uncreated.uncloud.client.main.ui.fragment.files.FilesView;
 import com.uncreated.uncloud.client.model.Model;
 import com.uncreated.uncloud.client.model.api.ApiClient;
+import com.uncreated.uncloud.client.model.api.entity.Session;
 import com.uncreated.uncloud.client.model.storage.FileNode;
 import com.uncreated.uncloud.client.model.storage.FileTransfer;
 import com.uncreated.uncloud.client.model.storage.FolderNode;
 import com.uncreated.uncloud.client.model.storage.Storage;
-import com.uncreated.uncloud.client.old.Controller;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,47 +17,126 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Retrofit;
-
-public class FilesController
-		extends Controller<FilesView>
+@InjectViewState
+public class FilesPresenter
+		extends MvpPresenter<FilesView>
 {
+	//Model
 	private Storage storage;
-	private FolderNode mergedFolder;
-	private String login;
-
-	private FolderNode curFolder;
-
-	private boolean firstRequest = true;
-
 	private ApiClient apiClient;
 
-	public FilesController(Retrofit retrofit, String rootFolder)
-	{
-		storage = new Storage(rootFolder);
+	private FolderNode mergedFolder;
+	private FolderNode curFolder;
 
+	public FilesPresenter()
+	{
+		storage = Model.getInstance().getStorage();
 		apiClient = Model.getInstance().getApiClient();
+
+		getViewState().setLoading(true);
+		updateFiles();
 	}
 
-	@Override
-	public synchronized void onAttach(FilesView filesView, Context context)
+	public void openFolder(FileInfo fileInfo)
 	{
-		super.onAttach(filesView, context);
-
-		if (firstRequest)
+		if (fileInfo == null)
 		{
-			updateFiles();
-			firstRequest = false;
+			if (curFolder.getParentFolder() != null)
+			{
+				curFolder = curFolder.getParentFolder();
+				sendFileInfo(curFolder);
+			}
+		}
+		else if (fileInfo.isDirectory())
+		{
+			FolderNode folderNode = getFileNode(fileInfo);
+			if (folderNode != null)
+			{
+				curFolder = folderNode;
+				sendFileInfo(curFolder);
+			}
 		}
 	}
 
-	public void updateFiles()
+	public void actionFile(FileInfo fileInfo)
+	{
+		getViewState().setActionDialog(true, fileInfo);
+	}
+
+	public void download(FileInfo fileInfo)
+	{
+		getViewState().setActionDialog(false, null);
+		getViewState().setLoading(true);
+		runThread(() ->
+		{
+			if (fileInfo.isDirectory())
+			{
+				downloadFolder(getFileNode(fileInfo));
+			}
+			else
+			{
+				downloadFile(getFileNode(fileInfo));
+			}
+
+			updateFiles();
+		});
+	}
+
+	public void upload(FileInfo fileInfo)
+	{
+		getViewState().setActionDialog(false, null);
+		getViewState().setLoading(true);
+		runThread(() ->
+		{
+			if (fileInfo.isDirectory())
+			{
+				uploadFolder(getFileNode(fileInfo));
+			}
+			else
+			{
+				uploadFile(getFileNode(fileInfo));
+			}
+
+			updateFiles();
+		});
+	}
+
+	public void deleteFileFromClient(FileInfo fileInfo)
+	{
+		getViewState().setActionDialog(false, null);
+		getViewState().setLoading(true);
+		runThread(() ->
+		{
+			try
+			{
+				storage.removeFile(Session.current.getLogin(), getFileNode(fileInfo).getFilePath());
+			}
+			catch (IOException | NullPointerException e)
+			{
+				e.printStackTrace();
+			}
+			updateFiles();
+		});
+	}
+
+	public void deleteFileFromServer(FileInfo fileInfo)
+	{
+		getViewState().setActionDialog(false, null);
+		getViewState().setLoading(true);
+		FileNode fileNode = getFileNode(fileInfo);
+		if (fileNode != null)
+		{
+			apiClient.deleteFile(fileNode.getFilePath(), body -> updateFiles(), getViewState());
+		}
+	}
+
+	private void updateFiles()
 	{
 		apiClient.updateFiles(body ->
 		{
 			try
 			{
-				FolderNode clientFolder = storage.getFiles(login);
+				FolderNode clientFolder = storage.getFiles(Session.current.getLogin());
 				mergedFolder = new FolderNode(clientFolder, body);
 				mergedFolder.sort();
 				curFolder = mergedFolder.goTo(curFolder != null ? curFolder.getFilePath() : "/");
@@ -66,9 +145,9 @@ public class FilesController
 			catch (FileNotFoundException e)
 			{
 				e.printStackTrace();
-				view.onFailRequest(e.getMessage());
+				getViewState().onFailRequest(e.getMessage());
 			}
-		}, view);
+		}, getViewState());
 	}
 
 	private <T extends FileNode> T getFileNode(FileInfo fileInfo)
@@ -96,28 +175,6 @@ public class FilesController
 		return null;
 	}
 
-	public void openFolder(FileInfo fileInfo)
-	{
-		if (fileInfo == null)
-		{
-			if (curFolder.getParentFolder() != null)
-			{
-				curFolder = curFolder.getParentFolder();
-				sendFileInfo(curFolder);
-
-			}
-		}
-		else if (fileInfo.isDirectory())
-		{
-			FolderNode folderNode = getFileNode(fileInfo);
-			if (folderNode != null)
-			{
-				curFolder = folderNode;
-				sendFileInfo(curFolder);
-			}
-		}
-	}
-
 	private void sendFileInfo(FolderNode folderNode)
 	{
 		ArrayList<FileInfo> files = new ArrayList<>();
@@ -130,11 +187,9 @@ public class FilesController
 			files.add(new FileInfo(file));
 		}
 
-		view.showFolder(files, folderNode.getParentFolder() == null);
+		getViewState().setLoading(false);
+		getViewState().showFolder(files, folderNode.getParentFolder() == null);
 	}
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////OLD
 
 	public void copyFile(List<File> fileList)
 	{
@@ -156,7 +211,7 @@ public class FilesController
 			catch (IOException e)
 			{
 				e.printStackTrace();
-				view.onFailRequest(e.getMessage());
+				getViewState().onFailRequest(e.getMessage());
 			}
 		});
 	}
@@ -213,23 +268,6 @@ public class FilesController
 		}
 
 		return true;
-	}
-
-	public void download(FileInfo fileInfo)
-	{
-		runThread(() ->
-		{
-			if (fileInfo.isDirectory())
-			{
-				downloadFolder(getFileNode(fileInfo));
-			}
-			else
-			{
-				downloadFile(getFileNode(fileInfo));
-			}
-
-			updateFiles();
-		});
 	}
 
 	private boolean uploadFile(FileNode fileNode)
@@ -294,50 +332,13 @@ public class FilesController
 		return true;
 	}
 
-	public void upload(FileInfo fileInfo)
-	{
-		runThread(() ->
-		{
-			if (fileInfo.isDirectory())
-			{
-				uploadFolder(getFileNode(fileInfo));
-			}
-			else
-			{
-				uploadFile(getFileNode(fileInfo));
-			}
-
-			updateFiles();
-		});
-	}
-
-	public void deleteFileFromClient(FileInfo fileInfo)
-	{
-		runThread(() ->
-		{
-			try
-			{
-				storage.removeFile(login, getFileNode(fileInfo).getFilePath());
-			}
-			catch (IOException | NullPointerException e)
-			{
-				e.printStackTrace();
-			}
-			updateFiles();
-		});
-	}
-
-	public void deleteFileFromServer(FileInfo fileInfo)
-	{
-		FileNode fileNode = getFileNode(fileInfo);
-		if (fileNode != null)
-		{
-			apiClient.deleteFile(fileNode.getFilePath(), body -> updateFiles(), view);
-		}
-	}
-
 	public void createFolder(String name)
 	{
-		apiClient.createFolder(curFolder.getFilePath() + name, body -> updateFiles(), view);
+		apiClient.createFolder(curFolder.getFilePath() + name, body -> updateFiles(), getViewState());
+	}
+
+	private void runThread(Runnable r)
+	{
+		new Thread(r).start();
 	}
 }

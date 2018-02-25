@@ -28,8 +28,14 @@ public class AuthPresenter
 		authManager = Model.getInstance().getAuthManager();
 		apiClient = Model.getInstance().getApiClient();
 
+		onBack();
+	}
+
+	public void onBack()
+	{
 		selectName(authManager.getLastKey());
 		getViewState().addNames(authManager.getKeys());
+		getViewState().setLoading(false);
 	}
 
 	public void selectName(String name)
@@ -99,6 +105,7 @@ public class AuthPresenter
 			apiClient.auth(authInf, new CallbackCodes<Session>()
 					.setOnCompleteEvent(body ->
 					{
+						Session.current = body;
 						authInf.setAccessToken(body.getAccessToken());
 						authManager.save(authInf);
 						getViewState().switchMainActivity();

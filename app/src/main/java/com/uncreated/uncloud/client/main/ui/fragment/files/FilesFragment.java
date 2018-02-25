@@ -1,13 +1,13 @@
-package com.uncreated.uncloud.client.main.fragment.files;
+package com.uncreated.uncloud.client.main.ui.fragment.files;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,13 +16,14 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.arellomobile.mvp.MvpFragment;
+import com.arellomobile.mvp.presenter.InjectPresenter;
+import com.arellomobile.mvp.presenter.PresenterType;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.old.main.FileInfo;
-import com.uncreated.uncloud.client.old.main.FilesController;
-import com.uncreated.uncloud.client.old.main.view.files.DialogControls;
-import com.uncreated.uncloud.client.old.main.view.files.FilesAdapter;
+import com.uncreated.uncloud.client.main.presentation.FileInfo;
+import com.uncreated.uncloud.client.main.presentation.FilesPresenter;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,36 +31,25 @@ import java.util.ArrayList;
 import static android.app.Activity.RESULT_OK;
 
 public class FilesFragment
-		extends Fragment
+		extends MvpFragment
 		implements FilesView
 {
 	private static final int FILE_SELECT_CODE = 0;
-
-	private FilesController controller;
 
 	private AlertDialog alertDialog;
 
 	private RecyclerView recyclerView;
 	private FloatingActionsMenu floatingActionsMenu;
 
-	public FilesFragment()
-	{
+	private DialogControls dialogControls;
 
-	}
+	@InjectPresenter(type = PresenterType.GLOBAL, tag = "FilesPresenter")
+	FilesPresenter filesPresenter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
-		/*controller = new FilesController(((App) getActivity().getApplication()).getRetrofit(),
-				getActivity().getFilesDir().getAbsolutePath());*/
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setView(R.layout.loading_dialog);
-		builder.setOnKeyListener(null);
-		alertDialog = builder.create();
-		alertDialog.setCancelable(false);
 	}
 
 	@Override
@@ -73,34 +63,12 @@ public class FilesFragment
 
 		floatingActionsMenu = rootView.findViewById(R.id.fab_menu);
 		FloatingActionButton createFolderButton = floatingActionsMenu.findViewById(R.id.create_folder_fab);
-		createFolderButton.setOnClickListener(view ->
-		{
-			onCreateFolderClick();
-		});
+		createFolderButton.setOnClickListener(view -> onCreateFolderClick());
 
 		FloatingActionButton addFileButton = floatingActionsMenu.findViewById(R.id.add_file_fab);
-		addFileButton.setOnClickListener(view ->
-		{
-			onAddFileClick();
-		});
+		addFileButton.setOnClickListener(view -> onAddFileClick());
 
 		return rootView;
-	}
-
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-
-		controller.onAttach(this, getActivity());
-	}
-
-	@Override
-	public void onStop()
-	{
-		super.onStop();
-
-		controller.onAttach(this, getActivity());
 	}
 
 	@Override
@@ -118,21 +86,11 @@ public class FilesFragment
 				if (resultCode == RESULT_OK)
 				{
 					Uri uri = data.getData();
-					/*try
-					{
-						InputStream inputStream = getActivity().getContentResolver().openInputStream(uri);
-						OutputStream outputStream =
-					}
-					catch (FileNotFoundException e)
-					{
-
-
-					}*/
 
 					if (uri != null)
 					{
 						File file = new File(uri.getPath());
-						controller.copyFile(file);
+						filesPresenter.copyFile(file);
 					}
 				}
 				break;
@@ -140,20 +98,9 @@ public class FilesFragment
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	protected void showLoading()
-	{
-		alertDialog.show();
-	}
-
-	protected void hideLoading()
-	{
-		alertDialog.hide();
-	}
-
 	@Override
 	public void showFolder(ArrayList<FileInfo> files, boolean rootFolder)
 	{
-		hideLoading();
 		FilesAdapter filesAdapter = new FilesAdapter(this, recyclerView, files, !rootFolder);
 		recyclerView.setAdapter(filesAdapter);
 	}
@@ -161,16 +108,41 @@ public class FilesFragment
 	@Override
 	public void onFailRequest(String msg)
 	{
-		hideLoading();
 		news(msg);
 	}
 
+	@Override
+	public void setLoading(boolean show)
+	{
+		Log.e("FilesFragment", "setLoading(" + show + " " + this);
+		if (show)
+		{
+			if (alertDialog == null)
+			{
+				alertDialog = new AlertDialog.Builder(getActivity())
+						.setView(R.layout.loading_dialog)
+						.setOnKeyListener(null)
+						.create();
+				alertDialog.setCancelable(false);
+				alertDialog.show();
+			}
+		}
+		else
+		{
+			if (alertDialog != null)
+			{
+				alertDialog.hide();
+				alertDialog.dismiss();
+				alertDialog = null;
+			}
+		}
+	}
 
 	public void onClickFile(FileInfo fileInfo)
 	{
 		if (fileInfo == null || fileInfo.isDirectory())
 		{
-			controller.openFolder(fileInfo);
+			filesPresenter.openFolder(fileInfo);
 		}
 	}
 
@@ -194,35 +166,34 @@ public class FilesFragment
 		return false;
 	}
 
-	public void call(Runnable runnable)
-	{
-		getActivity().runOnUiThread(runnable);
-	}
-
 	public void onLongClickFile(FileInfo fileInfo)
 	{
-		DialogControls dialogControls = new DialogControls(getActivity(), fileInfo);
-		dialogControls.setOnClickDownload(view ->
+		filesPresenter.actionFile(fileInfo);
+	}
+
+	@Override
+	public void setActionDialog(boolean show, FileInfo fileInfo)
+	{
+		if (show)
 		{
-			controller.download(fileInfo);
-			dialogControls.hide();
-		});
-		dialogControls.setOnClickUpload(view ->
+			if (dialogControls == null)
+			{
+				dialogControls = new DialogControls(getActivity(), fileInfo,
+						view -> filesPresenter.download(fileInfo),
+						view -> filesPresenter.upload(fileInfo),
+						view -> filesPresenter.deleteFileFromClient(fileInfo),
+						view -> filesPresenter.deleteFileFromServer(fileInfo));
+				dialogControls.show();
+			}
+		}
+		else
 		{
-			controller.upload(fileInfo);
-			dialogControls.hide();
-		});
-		dialogControls.setOnClickDeleteClient(view ->
-		{
-			controller.deleteFileFromClient(fileInfo);
-			dialogControls.hide();
-		});
-		dialogControls.setOnClickDeleteServer(view ->
-		{
-			controller.deleteFileFromServer(fileInfo);
-			dialogControls.hide();
-		});
-		dialogControls.show();
+			if (dialogControls != null)
+			{
+				dialogControls.dismiss();
+				dialogControls = null;
+			}
+		}
 	}
 
 	public void onCreateFolderClick()
@@ -239,17 +210,14 @@ public class FilesFragment
 		editText.setLayoutParams(layoutParams);
 		dialogBuilder.setView(editText);
 
-		dialogBuilder.setNegativeButton("Cancel", (dialogInterface, i) ->
-		{
-			dialogInterface.cancel();
-		});
+		dialogBuilder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
 
 		dialogBuilder.setPositiveButton("Create", (dialogInterface, i) ->
 		{
 			String folderName = editText.getText().toString();
 			if (folderName.length() > 0)
 			{
-				controller.createFolder(folderName);
+				filesPresenter.createFolder(folderName);
 				dialogInterface.cancel();
 			}
 		});
