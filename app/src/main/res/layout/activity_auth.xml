@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:windowSoftInputMode="stateVisible|adjustResize"
-    tools:context="com.uncreated.uncloud.client.auth.view.AuthActivity">
+    tools:context="com.uncreated.uncloud.client.mvp.ui.auth.activity.AuthActivity">
 
     <EditText
         android:id="@+id/loginEditText"
