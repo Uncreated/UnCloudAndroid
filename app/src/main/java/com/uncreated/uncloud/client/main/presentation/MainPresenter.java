@@ -38,4 +38,22 @@ public class MainPresenter
 	{
 		getViewState().logout();
 	}
+
+	@Override
+	public void showError(String message)
+	{
+		getViewState().showError(message);
+	}
+
+	@Override
+	public void showMessage(String message)
+	{
+		getViewState().showMessage(message);
+	}
+
+	@Override
+	public void setLoading(boolean show)
+	{
+		getViewState().setLoading(show);
+	}
 }

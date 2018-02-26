@@ -8,25 +8,25 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CallbackCodes<T>
+public class CallbackApi<T>
 		implements Callback<T>
 {
 	private SparseArray<Runnable> handlers;
 	private OnCompleteEvent<T> onCompleteEvent;
 	private OnFailedEvent onFailedEvent;
 
-	public CallbackCodes()
+	public CallbackApi()
 	{
 		handlers = new SparseArray<>();
 	}
 
-	public CallbackCodes<T> setOnCompleteEvent(OnCompleteEvent<T> onCompleteEvent)
+	public CallbackApi<T> setOnCompleteEvent(OnCompleteEvent<T> onCompleteEvent)
 	{
 		this.onCompleteEvent = onCompleteEvent;
 		return this;
 	}
 
-	public CallbackCodes<T> setOnFailedEvent(OnFailedEvent onFailedEvent)
+	public CallbackApi<T> setOnFailedEvent(OnFailedEvent onFailedEvent)
 	{
 		this.onFailedEvent = onFailedEvent;
 		return this;
@@ -42,7 +42,7 @@ public class CallbackCodes<T>
 		return onFailedEvent;
 	}
 
-	public CallbackCodes<T> add(Integer code, Runnable handler)
+	public CallbackApi<T> add(Integer code, Runnable handler)
 	{
 		handlers.put(code, handler);
 		return this;

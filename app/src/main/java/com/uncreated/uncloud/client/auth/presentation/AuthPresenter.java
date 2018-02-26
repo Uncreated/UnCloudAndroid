@@ -5,7 +5,7 @@ import com.arellomobile.mvp.MvpPresenter;
 import com.uncreated.uncloud.client.auth.ui.activity.AuthView;
 import com.uncreated.uncloud.client.model.Model;
 import com.uncreated.uncloud.client.model.api.ApiClient;
-import com.uncreated.uncloud.client.model.api.CallbackCodes;
+import com.uncreated.uncloud.client.model.api.CallbackApi;
 import com.uncreated.uncloud.client.model.api.entity.Session;
 import com.uncreated.uncloud.client.model.api.entity.User;
 import com.uncreated.uncloud.client.model.auth.AuthInf;
@@ -59,7 +59,7 @@ public class AuthPresenter
 			if (password.length() > 0)
 			{
 				getViewState().setLoading(true);
-				apiClient.register(new User(login, password), new CallbackCodes<Void>()
+				apiClient.register(new User(login, password), new CallbackApi<Void>()
 						.setOnCompleteEvent(body ->
 						{
 							getViewState().setLoading(false);
@@ -102,7 +102,7 @@ public class AuthPresenter
 				authInf = authManager.get(login);
 			}
 			getViewState().setLoading(true);
-			apiClient.auth(authInf, new CallbackCodes<Session>()
+			apiClient.auth(authInf, new CallbackApi<Session>()
 					.setOnCompleteEvent(body ->
 					{
 						Session.current = body;

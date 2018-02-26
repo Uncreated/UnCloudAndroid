@@ -15,6 +15,7 @@ import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.PresenterType;
 import com.uncreated.uncloud.R;
+import com.uncreated.uncloud.client.BaseActivity;
 import com.uncreated.uncloud.client.auth.presentation.AuthPresenter;
 import com.uncreated.uncloud.client.main.ui.activity.MainActivity;
 
@@ -24,7 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AuthActivity
-		extends MvpAppCompatActivity
+		extends BaseActivity
 		implements AuthView
 {
 	@BindView(R.id.login_edit_text)
@@ -79,6 +80,8 @@ public class AuthActivity
 		passwordEditText.setFilters(filters);
 
 	}
+
+
 
 	@Override
 	public void addNames(Set<String> names)

@@ -8,10 +8,11 @@ import android.view.ViewGroup;
 import com.arellomobile.mvp.MvpFragment;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.uncreated.uncloud.R;
+import com.uncreated.uncloud.client.BaseFragment;
 import com.uncreated.uncloud.client.main.presentation.AboutPresenter;
 
 public class AboutFragment
-		extends MvpFragment
+		extends BaseFragment
 		implements AboutView
 {
 	@InjectPresenter

@@ -7,18 +7,16 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.MvpFragment;
-import com.arellomobile.mvp.presenter.InjectPresenter;
-import com.arellomobile.mvp.presenter.PresenterType;
 import com.uncreated.uncloud.R;
-import com.uncreated.uncloud.client.main.presentation.MainPresenter;
+import com.uncreated.uncloud.client.BaseFragment;
 import com.uncreated.uncloud.client.main.ui.fragment.about.AboutFragment;
 import com.uncreated.uncloud.client.main.ui.fragment.files.FilesFragment;
 import com.uncreated.uncloud.client.main.ui.fragment.settings.SettingsFragment;
@@ -28,10 +26,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity
-		extends MvpAppCompatActivity
-		implements NavigationView.OnNavigationItemSelectedListener,
-		MainView
+		extends AppCompatActivity
+		implements NavigationView.OnNavigationItemSelectedListener/*, MainView*/
 {
+	private static final String contentFragmentTag = "content_fragment_tag";
+
 	@BindView(R.id.nav_view)
 	NavigationView navigationView;
 
@@ -44,11 +43,6 @@ public class MainActivity
 	private FilesFragment filesFragment;
 	private SettingsFragment settingsFragment;
 	private AboutFragment aboutFragment;
-
-	private boolean files = true;
-
-	@InjectPresenter(type = PresenterType.GLOBAL, tag = "MainPresenter")
-	MainPresenter mainPresenter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -70,46 +64,48 @@ public class MainActivity
 		TextView textView = navigationView.getHeaderView(0).findViewById(R.id.login_text_view);
 		textView.setText(Session.current.getLogin());
 
-		filesFragment = new FilesFragment();
-		settingsFragment = new SettingsFragment();
-		aboutFragment = new AboutFragment();
+		if (getFragmentManager().findFragmentByTag(contentFragmentTag) == null)
+		{
+			switchFiles();
+		}
 	}
 
-	@Override
 	public void switchFiles()
 	{
-		files = true;
-		switchFragment(filesFragment);
+		switchFragment(filesFragment = new FilesFragment());
 	}
 
-	@Override
 	public void switchSettings()
 	{
-		files = false;
-		switchFragment(settingsFragment);
+		switchFragment(settingsFragment = new SettingsFragment());
 	}
 
-	@Override
 	public void switchAbout()
 	{
-		files = false;
-		switchFragment(aboutFragment);
+		switchFragment(aboutFragment = new AboutFragment());
 	}
 
-	@Override
 	public void logout()
 	{
-		filesFragment.getMvpDelegate().onDestroy();
-		settingsFragment.getMvpDelegate().onDestroy();
-		aboutFragment.getMvpDelegate().onDestroy();
-		getMvpDelegate().onDestroy();
+		if (filesFragment != null)
+		{
+			filesFragment.getMvpDelegate().onDestroy();
+		}
+		if (settingsFragment != null)
+		{
+			settingsFragment.getMvpDelegate().onDestroy();
+		}
+		if (aboutFragment != null)
+		{
+			aboutFragment.getMvpDelegate().onDestroy();
+		}
 		finish();
 	}
 
 	private void switchFragment(MvpFragment fragment)
 	{
 		getFragmentManager().beginTransaction()
-				.replace(R.id.main_fragment_container, fragment)
+				.replace(R.id.main_fragment_container, fragment, contentFragmentTag)
 				.commitAllowingStateLoss();
 	}
 
@@ -144,7 +140,8 @@ public class MainActivity
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent event)
 	{
-		if (files && filesFragment.dispatchTouchEvent(event))
+		BaseFragment baseFragment = (BaseFragment) getFragmentManager().findFragmentByTag(contentFragmentTag);
+		if (baseFragment != null && baseFragment.dispatchTouchEvent(event))
 		{
 			return true;
 		}
@@ -159,16 +156,16 @@ public class MainActivity
 		switch (item.getItemId())
 		{
 			case R.id.nav_home:
-				mainPresenter.switchFiles();
+				switchFiles();
 				break;
 			case R.id.nav_settings:
-				mainPresenter.switchSettings();
+				switchSettings();
 				break;
 			case R.id.nav_about:
-				mainPresenter.switchAbout();
+				switchAbout();
 				break;
 			case R.id.nav_logout:
-				mainPresenter.logout();
+				logout();
 				break;
 		}
 

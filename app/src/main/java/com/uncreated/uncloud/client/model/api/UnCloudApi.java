@@ -38,8 +38,8 @@ public interface UnCloudApi
 							   @Query("part") Integer part);
 
 	@POST("api/file")
-	Call<FileTransfer> postFile(@Header("Authorization") String accessToken,
-								@Body FileTransfer fileTransfer);
+	Call<Void> postFile(@Header("Authorization") String accessToken,
+						@Body FileTransfer fileTransfer);
 
 	@DELETE("api/file")
 	Call<Void> deleteFile(@Header("Authorization") String accessToken,

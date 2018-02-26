@@ -1,6 +1,7 @@
 package com.uncreated.uncloud.client.model.storage;
 
 
+import com.uncreated.uncloud.client.model.Model;
 import com.uncreated.uncloud.client.model.api.entity.Session;
 
 import org.apache.commons.io.FileUtils;
@@ -40,20 +41,28 @@ public class Storage
 		return new FolderNode(userFolder);
 	}
 
-	public void copyFile(FolderNode curFolder, File... files) throws IOException
+	public void copyFile(FolderNode curFolder, CallbackStorage callback, File... files)
 	{
-		for (File source : files)
+		try
 		{
-			File dest = new File(makeFullPath(curFolder.getFilePath(), source.getName()));
-			dest.getParentFile().mkdirs();
-			if (source.isDirectory())
+			for (File source : files)
 			{
-				FileUtils.copyDirectory(source, dest);
+				File dest = new File(makeFullPath(curFolder.getFilePath(), source.getName()));
+				dest.getParentFile().mkdirs();
+				if (source.isDirectory())
+				{
+					FileUtils.copyDirectory(source, dest);
+				}
+				else
+				{
+					FileUtils.copyFile(source, dest);
+				}
 			}
-			else
-			{
-				FileUtils.copyFile(source, dest);
-			}
+			callback.onCompletePost();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
 		}
 	}
 
@@ -72,54 +81,33 @@ public class Storage
 		fileTransfer.read(new File(makeFullPath(path)));
 	}
 
-	public FileTransfer getFilePart(String login, String filePath, int part) throws IOException
+	public void removeFile(String login, String filePath, CallbackStorage callback)
 	{
-		File file = new File(rootFolder + login + filePath);
-		if (!file.exists())
+		new Thread(() ->
 		{
-			throw new FileNotFoundException(filePath);
-		}
-
-		int size = FileTransfer.getSizeOfPart(file.length(), part);
-
-		FileTransfer fileTransfer = new FileTransfer(filePath, part, size);
-		fileTransfer.read(rootFolder + login);
-
-		return fileTransfer;
-	}
-
-	public boolean removeFile(String login, String filePath) throws IOException
-	{
-		File file = new File(rootFolder + login + filePath);
-		if (!file.exists())
-		{
-			throw new FileNotFoundException(filePath);
-		}
-
-		if (file.isDirectory())
-		{
-			FileUtils.deleteDirectory(file);
-			return true;
-		}
-		else
-		{
-			return file.delete();
-		}
-	}
-
-	public void setFilePart(String login, FileTransfer fileTransfer) throws IOException
-	{
-		File file = new File(rootFolder + login + fileTransfer.getPath());
-		if (!file.exists())
-		{
-			file.getParentFile().mkdirs();
-			if (!file.createNewFile())
+			try
 			{
-				throw new IOException("Can not create file " + file.getPath());
-			}
-		}
+				File file = new File(rootFolder + login + filePath);
 
-		fileTransfer.write(file);
+				if (file.isDirectory())
+				{
+					FileUtils.deleteDirectory(file);
+					callback.onCompletePost();
+					return;
+				}
+				else if (file.delete())
+				{
+					callback.onCompletePost();
+					return;
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+
+			callback.onFailedPost("Can not delete:\n" + filePath);
+		}).start();
 	}
 
 	public void createFolder(String login, String path) throws IOException
@@ -134,4 +122,177 @@ public class Storage
 		}
 	}
 
+	public void downloadFile(FileNode fileNode, CallbackStorage callback)
+	{
+		new Thread(() ->
+		{
+			if (downloadFile(fileNode))
+			{
+				callback.onCompletePost();
+			}
+			else
+			{
+				callback.onFailedPost("Download failed:\n" + fileNode.getFilePath());
+			}
+		}).start();
+	}
+
+	private boolean downloadFile(FileNode fileNode)
+	{
+		String path = fileNode.getFilePath();
+		int parts = fileNode.getParts();
+		for (int i = 0; i < parts || i == 0; i++)
+		{
+			try
+			{
+				FileTransfer fileTransfer = Model.getInstance().getApiClient().getFile(path, i);
+				if (fileTransfer == null)
+				{
+					return false;
+				}
+				write(fileTransfer);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public void downloadFolder(FolderNode folderNode, CallbackStorage callback)
+	{
+		new Thread(() ->
+		{
+			if (downloadFolder(folderNode))
+			{
+				callback.onCompletePost();
+			}
+			else
+			{
+				callback.onFailedPost("Download failed:\n" + folderNode.getFilePath());
+			}
+		}).start();
+	}
+
+	private boolean downloadFolder(FolderNode folderNode)
+	{
+		if (!folderNode.isOnClient())
+		{
+			createPath(folderNode.getFilePath());
+		}
+		for (FolderNode folder : folderNode.getFolders())
+		{
+			if (!downloadFolder(folder))
+			{
+				return false;
+			}
+		}
+
+		for (FileNode fileNode : folderNode.getFiles())
+		{
+			if (!fileNode.isOnClient())
+			{
+				if (!downloadFile(fileNode))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	public void uploadFile(FileNode fileNode, CallbackStorage callback)
+	{
+		new Thread(() ->
+		{
+			if (uploadFile(fileNode))
+			{
+				callback.onCompletePost();
+			}
+			else
+			{
+				callback.onFailedPost("Upload failed:\n" + fileNode.getFilePath());
+			}
+		}).start();
+	}
+
+	private boolean uploadFile(FileNode fileNode)
+	{
+		String path = fileNode.getFilePath();
+		int szi = fileNode.getParts();
+		for (int i = 0; i < szi || i == 0; i++)
+		{
+			try
+			{
+				FileTransfer fileTransfer = new FileTransfer(path, i, FileTransfer.getSizeOfPart(fileNode.getSize(), i));
+				read(fileTransfer, path);
+				if (!Model.getInstance().getApiClient().postFile(fileTransfer))
+				{
+					return false;
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public void uploadFolder(FolderNode folderNode, CallbackStorage callback)
+	{
+		new Thread(() ->
+		{
+			if (uploadFolder(folderNode))
+			{
+				callback.onCompletePost();
+			}
+			else
+			{
+				callback.onFailedPost("Upload failed:\n" + folderNode.getFilePath());
+			}
+		}).start();
+	}
+
+	private boolean uploadFolder(FolderNode folderNode)
+	{
+		if (!folderNode.isOnServer())
+		{
+			try
+			{
+				if (!Model.getInstance().getApiClient().postFolder(folderNode.getFilePath()))
+				{
+					return false;
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		for (FolderNode folder : folderNode.getFolders())
+		{
+			if (!uploadFolder(folder))
+			{
+				return false;
+			}
+		}
+
+		for (FileNode fileNode : folderNode.getFiles())
+		{
+			if (!fileNode.isOnServer())
+			{
+				if (!uploadFile(fileNode))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 }

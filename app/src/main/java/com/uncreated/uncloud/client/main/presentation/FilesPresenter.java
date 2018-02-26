@@ -5,17 +5,16 @@ import com.arellomobile.mvp.MvpPresenter;
 import com.uncreated.uncloud.client.main.ui.fragment.files.FilesView;
 import com.uncreated.uncloud.client.model.Model;
 import com.uncreated.uncloud.client.model.api.ApiClient;
+import com.uncreated.uncloud.client.model.api.CallbackApi;
 import com.uncreated.uncloud.client.model.api.entity.Session;
+import com.uncreated.uncloud.client.model.storage.CallbackStorage;
 import com.uncreated.uncloud.client.model.storage.FileNode;
-import com.uncreated.uncloud.client.model.storage.FileTransfer;
 import com.uncreated.uncloud.client.model.storage.FolderNode;
 import com.uncreated.uncloud.client.model.storage.Storage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 @InjectViewState
 public class FilesPresenter
@@ -63,91 +62,95 @@ public class FilesPresenter
 		getViewState().setActionDialog(true, fileInfo);
 	}
 
-	public void download(FileInfo fileInfo)
+	public void cancelAction()
+	{
+		getViewState().setActionDialog(false, null);
+	}
+
+	private void dialogAction()
 	{
 		getViewState().setActionDialog(false, null);
 		getViewState().setLoading(true);
-		runThread(() ->
-		{
-			if (fileInfo.isDirectory())
-			{
-				downloadFolder(getFileNode(fileInfo));
-			}
-			else
-			{
-				downloadFile(getFileNode(fileInfo));
-			}
+	}
 
-			updateFiles();
-		});
+	public void download(FileInfo fileInfo)
+	{
+		dialogAction();
+
+		CallbackStorage callbackStorage = new CallbackStorage(this::updateFiles, this::showError);
+
+		if (fileInfo.isDirectory())
+		{
+			storage.downloadFolder(getFileNode(fileInfo), callbackStorage);
+		}
+		else
+		{
+			storage.downloadFile(getFileNode(fileInfo), callbackStorage);
+		}
 	}
 
 	public void upload(FileInfo fileInfo)
 	{
-		getViewState().setActionDialog(false, null);
-		getViewState().setLoading(true);
-		runThread(() ->
-		{
-			if (fileInfo.isDirectory())
-			{
-				uploadFolder(getFileNode(fileInfo));
-			}
-			else
-			{
-				uploadFile(getFileNode(fileInfo));
-			}
+		dialogAction();
 
-			updateFiles();
-		});
+		CallbackStorage callbackStorage = new CallbackStorage(this::updateFiles, this::showError);
+
+		if (fileInfo.isDirectory())
+		{
+			storage.uploadFolder(getFileNode(fileInfo), callbackStorage);
+		}
+		else
+		{
+			storage.uploadFile(getFileNode(fileInfo), callbackStorage);
+		}
 	}
 
 	public void deleteFileFromClient(FileInfo fileInfo)
 	{
-		getViewState().setActionDialog(false, null);
-		getViewState().setLoading(true);
-		runThread(() ->
-		{
-			try
-			{
-				storage.removeFile(Session.current.getLogin(), getFileNode(fileInfo).getFilePath());
-			}
-			catch (IOException | NullPointerException e)
-			{
-				e.printStackTrace();
-			}
-			updateFiles();
-		});
+		dialogAction();
+
+		storage.removeFile(Session.current.getLogin(),
+				getFileNode(fileInfo).getFilePath(),
+				new CallbackStorage(this::updateFiles, this::showError));
 	}
 
 	public void deleteFileFromServer(FileInfo fileInfo)
 	{
-		getViewState().setActionDialog(false, null);
-		getViewState().setLoading(true);
+		dialogAction();
 		FileNode fileNode = getFileNode(fileInfo);
 		if (fileNode != null)
 		{
-			apiClient.deleteFile(fileNode.getFilePath(), body -> updateFiles(), getViewState());
+			apiClient.deleteFile(fileNode.getFilePath(), new CallbackApi<Void>()
+					.setOnCompleteEvent(body -> updateFiles())
+					.setOnFailedEvent(this::showError));
 		}
+	}
+
+	private void showError(String message)
+	{
+		getViewState().showError(message);
+		getViewState().setLoading(false);
 	}
 
 	private void updateFiles()
 	{
-		apiClient.updateFiles(body ->
-		{
-			try
-			{
-				FolderNode clientFolder = storage.getFiles(Session.current.getLogin());
-				mergedFolder = new FolderNode(clientFolder, body);
-				mergedFolder.sort();
-				curFolder = mergedFolder.goTo(curFolder != null ? curFolder.getFilePath() : "/");
-				sendFileInfo(curFolder);
-			}
-			catch (FileNotFoundException e)
-			{
-				e.printStackTrace();
-				getViewState().onFailRequest(e.getMessage());
-			}
-		}, getViewState());
+		apiClient.updateFiles(new CallbackApi<FolderNode>()
+				.setOnCompleteEvent(body ->
+				{
+					try
+					{
+						FolderNode clientFolder = storage.getFiles(Session.current.getLogin());
+						mergedFolder = new FolderNode(clientFolder, body);
+						curFolder = mergedFolder.goTo(curFolder != null ? curFolder.getFilePath() : "/");
+						sendFileInfo(curFolder);
+					}
+					catch (FileNotFoundException e)
+					{
+						e.printStackTrace();
+						showError(e.getMessage());
+					}
+				})
+				.setOnFailedEvent(this::showError));
 	}
 
 	private <T extends FileNode> T getFileNode(FileInfo fileInfo)
@@ -187,158 +190,20 @@ public class FilesPresenter
 			files.add(new FileInfo(file));
 		}
 
-		getViewState().setLoading(false);
 		getViewState().showFolder(files, folderNode.getParentFolder() == null);
-	}
-
-	public void copyFile(List<File> fileList)
-	{
-		if (fileList != null && fileList.size() > 0)
-		{
-			copyFile(fileList.toArray(new File[fileList.size()]));
-		}
+		getViewState().setLoading(false);
 	}
 
 	public void copyFile(File... files)
 	{
-		runThread(() ->
-		{
-			try
-			{
-				storage.copyFile(curFolder, files);
-				updateFiles();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				getViewState().onFailRequest(e.getMessage());
-			}
-		});
-	}
-
-	private boolean downloadFile(FileNode fileNode)
-	{
-		String path = fileNode.getFilePath();
-		int parts = fileNode.getParts();
-		for (int i = 0; i < parts || i == 0; i++)
-		{
-			try
-			{
-				FileTransfer fileTransfer = apiClient.getFile(path, i);
-				if (fileTransfer == null)
-				{
-					return false;
-				}
-				storage.write(fileTransfer);
-
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				//delete file
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean downloadFolder(FolderNode folderNode)
-	{
-		if (!folderNode.isOnClient())
-		{
-			storage.createPath(folderNode.getFilePath());
-		}
-		for (FolderNode folder : folderNode.getFolders())
-		{
-			if (!downloadFolder(folder))
-			{
-				return false;
-			}
-		}
-
-		for (FileNode fileNode : folderNode.getFiles())
-		{
-			if (!fileNode.isOnClient())
-			{
-				if (!downloadFile(fileNode))
-				{
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-
-	private boolean uploadFile(FileNode fileNode)
-	{
-		String path = fileNode.getFilePath();
-		int szi = fileNode.getParts();
-		for (int i = 0; i < szi || i == 0; i++)
-		{
-			try
-			{
-				FileTransfer fileTransfer = new FileTransfer(path, i, FileTransfer.getSizeOfPart(fileNode.getSize(), i));
-				storage.read(fileTransfer, path);
-				if (!apiClient.postFile(fileTransfer))
-				{
-					return false;
-				}
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean uploadFolder(FolderNode folderNode)
-	{
-		if (!folderNode.isOnServer())
-		{
-			try
-			{
-				if (!apiClient.postFolder(folderNode.getFilePath()))
-				{
-					return false;
-				}
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		for (FolderNode folder : folderNode.getFolders())
-		{
-			if (!uploadFolder(folder))
-			{
-				return false;
-			}
-		}
-
-		for (FileNode fileNode : folderNode.getFiles())
-		{
-			if (!fileNode.isOnServer())
-			{
-				if (!uploadFile(fileNode))
-				{
-					return false;
-				}
-			}
-		}
-
-		return true;
+		getViewState().setLoading(true);
+		storage.copyFile(curFolder, new CallbackStorage(this::updateFiles, this::showError), files);
 	}
 
 	public void createFolder(String name)
 	{
-		apiClient.createFolder(curFolder.getFilePath() + name, body -> updateFiles(), getViewState());
-	}
-
-	private void runThread(Runnable r)
-	{
-		new Thread(r).start();
+		apiClient.postFolder(curFolder.getFilePath() + name, new CallbackApi<Void>()
+				.setOnCompleteEvent(body -> updateFiles())
+				.setOnFailedEvent(this::showError));
 	}
 }

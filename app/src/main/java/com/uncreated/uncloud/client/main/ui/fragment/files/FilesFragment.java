@@ -14,32 +14,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
-import com.arellomobile.mvp.MvpFragment;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.PresenterType;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.uncreated.uncloud.R;
+import com.uncreated.uncloud.client.BaseFragment;
 import com.uncreated.uncloud.client.main.presentation.FileInfo;
 import com.uncreated.uncloud.client.main.presentation.FilesPresenter;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static android.app.Activity.RESULT_OK;
 
 public class FilesFragment
-		extends MvpFragment
+		extends BaseFragment
 		implements FilesView
 {
-	private static final int FILE_SELECT_CODE = 0;
+	private static final int FILE_SELECT_CODE = 1;
 
-	private AlertDialog alertDialog;
+	@BindView(R.id.recycler_view)
+	RecyclerView recyclerView;
 
-	private RecyclerView recyclerView;
-	private FloatingActionsMenu floatingActionsMenu;
+	@BindView(R.id.fab_menu)
+	FloatingActionsMenu floatingActionsMenu;
 
 	private DialogControls dialogControls;
 
@@ -47,21 +50,15 @@ public class FilesFragment
 	FilesPresenter filesPresenter;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
-	}
-
-	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState)
 	{
 		View rootView = inflater.inflate(R.layout.fragment_files, container, false);
 
-		recyclerView = rootView.findViewById(R.id.recycler_view);
+		ButterKnife.bind(this, rootView);
+
 		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-		floatingActionsMenu = rootView.findViewById(R.id.fab_menu);
 		FloatingActionButton createFolderButton = floatingActionsMenu.findViewById(R.id.create_folder_fab);
 		createFolderButton.setOnClickListener(view -> onCreateFolderClick());
 
@@ -72,9 +69,20 @@ public class FilesFragment
 	}
 
 	@Override
-	public void onDetach()
+	public boolean dispatchTouchEvent(MotionEvent event)
 	{
-		super.onDetach();
+		if (event.getAction() == MotionEvent.ACTION_DOWN && floatingActionsMenu.isExpanded())
+		{
+			Rect outRect = new Rect();
+			floatingActionsMenu.getGlobalVisibleRect(outRect);
+
+			if (!outRect.contains((int) event.getRawX(), (int) event.getRawY()))
+			{
+				floatingActionsMenu.collapse();
+				return true;
+			}
+		}
+		return super.dispatchTouchEvent(event);
 	}
 
 	@Override
@@ -105,65 +113,12 @@ public class FilesFragment
 		recyclerView.setAdapter(filesAdapter);
 	}
 
-	@Override
-	public void onFailRequest(String msg)
-	{
-		news(msg);
-	}
-
-	@Override
-	public void setLoading(boolean show)
-	{
-		Log.e("FilesFragment", "setLoading(" + show + " " + this);
-		if (show)
-		{
-			if (alertDialog == null)
-			{
-				alertDialog = new AlertDialog.Builder(getActivity())
-						.setView(R.layout.loading_dialog)
-						.setOnKeyListener(null)
-						.create();
-				alertDialog.setCancelable(false);
-				alertDialog.show();
-			}
-		}
-		else
-		{
-			if (alertDialog != null)
-			{
-				alertDialog.hide();
-				alertDialog.dismiss();
-				alertDialog = null;
-			}
-		}
-	}
-
 	public void onClickFile(FileInfo fileInfo)
 	{
 		if (fileInfo == null || fileInfo.isDirectory())
 		{
 			filesPresenter.openFolder(fileInfo);
 		}
-	}
-
-	public boolean dispatchTouchEvent(MotionEvent event)
-	{
-		if (event.getAction() == MotionEvent.ACTION_DOWN)
-		{
-			if (floatingActionsMenu.isExpanded())
-			{
-				Rect outRect = new Rect();
-				floatingActionsMenu.getGlobalVisibleRect(outRect);
-
-				if (!outRect.contains((int) event.getRawX(), (int) event.getRawY()))
-				{
-					floatingActionsMenu.collapse();
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	public void onLongClickFile(FileInfo fileInfo)
@@ -174,6 +129,7 @@ public class FilesFragment
 	@Override
 	public void setActionDialog(boolean show, FileInfo fileInfo)
 	{
+		Log.d("FilesFragment", "setActionDialog(" + show + ")");
 		if (show)
 		{
 			if (dialogControls == null)
@@ -183,6 +139,7 @@ public class FilesFragment
 						view -> filesPresenter.upload(fileInfo),
 						view -> filesPresenter.deleteFileFromClient(fileInfo),
 						view -> filesPresenter.deleteFileFromServer(fileInfo));
+				dialogControls.setOnCancelListener(dialogInterface -> filesPresenter.cancelAction());
 				dialogControls.show();
 			}
 		}
@@ -190,6 +147,7 @@ public class FilesFragment
 		{
 			if (dialogControls != null)
 			{
+				dialogControls.hide();
 				dialogControls.dismiss();
 				dialogControls = null;
 			}
@@ -243,12 +201,7 @@ public class FilesFragment
 		}
 		catch (android.content.ActivityNotFoundException ex)
 		{
-			news("Please install a File Manager.");
+			showError("Please install a File Manager.");
 		}
-	}
-
-	protected void news(String msg)
-	{
-		Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
 	}
 }
