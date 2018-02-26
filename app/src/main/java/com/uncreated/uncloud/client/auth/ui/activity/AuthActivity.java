@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.PresenterType;
 import com.uncreated.uncloud.R;
@@ -80,7 +79,6 @@ public class AuthActivity
 		passwordEditText.setFilters(filters);
 
 	}
-
 
 
 	@Override

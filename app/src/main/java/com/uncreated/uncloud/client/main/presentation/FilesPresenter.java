@@ -29,8 +29,8 @@ public class FilesPresenter
 
 	public FilesPresenter()
 	{
-		storage = Model.getInstance().getStorage();
-		apiClient = Model.getInstance().getApiClient();
+		storage = Model.getStorage();
+		apiClient = Model.getApiClient();
 
 		getViewState().setLoading(true);
 		updateFiles();

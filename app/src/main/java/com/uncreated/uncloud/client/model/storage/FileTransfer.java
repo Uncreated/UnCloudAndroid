@@ -6,7 +6,7 @@ import java.io.RandomAccessFile;
 
 public class FileTransfer
 {
-	private static final int PART_SIZE = 10485760;//10mb
+	private static final int PART_SIZE = 1048576;//1mb
 
 	private String path;
 	private Integer part;

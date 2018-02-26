@@ -1,6 +1,5 @@
 package com.uncreated.uncloud.client.main.ui.activity;
 
-import com.arellomobile.mvp.viewstate.strategy.SingleStateStrategy;
 import com.arellomobile.mvp.viewstate.strategy.SkipStrategy;
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 import com.uncreated.uncloud.client.BaseView;

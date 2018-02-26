@@ -3,7 +3,7 @@ package com.uncreated.uncloud.client.model.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.google.gson.Gson;
+import com.uncreated.uncloud.client.model.Model;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -18,12 +18,9 @@ public class AuthManager
 	private SharedPreferences sharedPreferences;
 
 	private AuthInfBox authInfBox;
-	private Gson gson;
 
 	public AuthManager(Context context)
 	{
-		this.gson = new Gson();
-
 		sharedPreferences = context.getSharedPreferences(PREF_KEY_AUTH, MODE_PRIVATE);
 
 		String json = sharedPreferences.getString(KEY_AUTH_INF_BOX, null);
@@ -31,7 +28,7 @@ public class AuthManager
 		{
 			try
 			{
-				authInfBox = gson.fromJson(json, AuthInfBox.class);
+				authInfBox = Model.getGson().fromJson(json, AuthInfBox.class);
 			}
 			catch (Exception e)
 			{
@@ -67,7 +64,7 @@ public class AuthManager
 			authInfBox.authInfMap.put(authInfBox.keyLast, authInf);
 		}
 
-		String json = gson.toJson(authInfBox);
+		String json = Model.getGson().toJson(authInfBox);
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString(KEY_AUTH_INF_BOX, json);
 		editor.apply();

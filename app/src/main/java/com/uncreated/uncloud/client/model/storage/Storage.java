@@ -145,7 +145,7 @@ public class Storage
 		{
 			try
 			{
-				FileTransfer fileTransfer = Model.getInstance().getApiClient().getFile(path, i);
+				FileTransfer fileTransfer = Model.getApiClient().getFile(path, i);
 				if (fileTransfer == null)
 				{
 					return false;
@@ -229,7 +229,7 @@ public class Storage
 			{
 				FileTransfer fileTransfer = new FileTransfer(path, i, FileTransfer.getSizeOfPart(fileNode.getSize(), i));
 				read(fileTransfer, path);
-				if (!Model.getInstance().getApiClient().postFile(fileTransfer))
+				if (!Model.getApiClient().postFile(fileTransfer))
 				{
 					return false;
 				}
@@ -264,7 +264,7 @@ public class Storage
 		{
 			try
 			{
-				if (!Model.getInstance().getApiClient().postFolder(folderNode.getFilePath()))
+				if (!Model.getApiClient().postFolder(folderNode.getFilePath()))
 				{
 					return false;
 				}

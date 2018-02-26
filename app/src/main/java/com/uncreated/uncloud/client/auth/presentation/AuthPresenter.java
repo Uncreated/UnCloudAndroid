@@ -25,8 +25,8 @@ public class AuthPresenter
 
 	public AuthPresenter()
 	{
-		authManager = Model.getInstance().getAuthManager();
-		apiClient = Model.getInstance().getApiClient();
+		authManager = Model.getAuthManager();
+		apiClient = Model.getApiClient();
 
 		onBack();
 	}

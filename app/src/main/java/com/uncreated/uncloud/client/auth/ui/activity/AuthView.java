@@ -1,9 +1,6 @@
 package com.uncreated.uncloud.client.auth.ui.activity;
 
 
-import android.transition.Slide;
-
-import com.arellomobile.mvp.MvpView;
 import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy;
 import com.arellomobile.mvp.viewstate.strategy.SkipStrategy;
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
