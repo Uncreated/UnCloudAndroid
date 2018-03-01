@@ -8,12 +8,10 @@ import com.uncreated.uncloud.client.main.presentation.FileInfo;
 
 import java.util.ArrayList;
 
-public interface FilesView
-		extends BaseView
-{
-	@StateStrategyType(SingleStateStrategy.class)
-	void showFolder(ArrayList<FileInfo> files, boolean rootFolder);
+public interface FilesView extends BaseView {
+    @StateStrategyType(SingleStateStrategy.class)
+    void showFolder(ArrayList<FileInfo> files, boolean rootFolder);
 
-	@StateStrategyType(AddToEndSingleStrategy.class)
-	void setActionDialog(boolean show, FileInfo fileInfo);
+    @StateStrategyType(AddToEndSingleStrategy.class)
+    void setActionDialog(boolean show, FileInfo fileInfo);
 }

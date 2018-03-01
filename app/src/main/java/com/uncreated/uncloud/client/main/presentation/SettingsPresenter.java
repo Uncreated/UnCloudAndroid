@@ -5,8 +5,5 @@ import com.arellomobile.mvp.MvpPresenter;
 import com.uncreated.uncloud.client.main.ui.fragment.settings.SettingsView;
 
 @InjectViewState
-public class SettingsPresenter
-		extends MvpPresenter<SettingsView>
-		implements SettingsView
-{
+public class SettingsPresenter extends MvpPresenter<SettingsView> implements SettingsView {
 }

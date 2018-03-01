@@ -13,7 +13,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.arellomobile.mvp.MvpFragment;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.BaseFragment;
@@ -22,154 +23,127 @@ import com.uncreated.uncloud.client.main.ui.fragment.files.FilesFragment;
 import com.uncreated.uncloud.client.main.ui.fragment.settings.SettingsFragment;
 import com.uncreated.uncloud.client.model.api.entity.Session;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String contentFragmentTag = "content_fragment_tag";
 
-public class MainActivity
-		extends AppCompatActivity
-		implements NavigationView.OnNavigationItemSelectedListener/*, MainView*/
-{
-	private static final String contentFragmentTag = "content_fragment_tag";
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
 
-	@BindView(R.id.nav_view)
-	NavigationView navigationView;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
 
-	@BindView(R.id.drawer_layout)
-	DrawerLayout drawer;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
-	@BindView(R.id.toolbar)
-	Toolbar toolbar;
+    private FilesFragment filesFragment;
+    private SettingsFragment settingsFragment;
+    private AboutFragment aboutFragment;
 
-	private FilesFragment filesFragment;
-	private SettingsFragment settingsFragment;
-	private AboutFragment aboutFragment;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-		ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
 
-		setSupportActionBar(toolbar);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
 
-		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-				this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-		drawer.addDrawerListener(toggle);
-		toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
 
-		navigationView.setNavigationItemSelectedListener(this);
+        TextView textView = navigationView.getHeaderView(0).findViewById(R.id.login_text_view);
+        textView.setText(Session.current.getLogin());
 
-		TextView textView = navigationView.getHeaderView(0).findViewById(R.id.login_text_view);
-		textView.setText(Session.current.getLogin());
+        if (getFragmentManager().findFragmentByTag(contentFragmentTag) == null) {
+            switchFiles();
+        }
+    }
 
-		if (getFragmentManager().findFragmentByTag(contentFragmentTag) == null)
-		{
-			switchFiles();
-		}
-	}
+    public void switchFiles() {
+        switchFragment(filesFragment = new FilesFragment());
+    }
 
-	public void switchFiles()
-	{
-		switchFragment(filesFragment = new FilesFragment());
-	}
+    public void switchSettings() {
+        switchFragment(settingsFragment = new SettingsFragment());
+    }
 
-	public void switchSettings()
-	{
-		switchFragment(settingsFragment = new SettingsFragment());
-	}
+    public void switchAbout() {
+        switchFragment(aboutFragment = new AboutFragment());
+    }
 
-	public void switchAbout()
-	{
-		switchFragment(aboutFragment = new AboutFragment());
-	}
+    public void logout() {
+        if (filesFragment != null) {
+            filesFragment.getMvpDelegate().onDestroy();
+        }
+        if (settingsFragment != null) {
+            settingsFragment.getMvpDelegate().onDestroy();
+        }
+        if (aboutFragment != null) {
+            aboutFragment.getMvpDelegate().onDestroy();
+        }
+        finish();
+    }
 
-	public void logout()
-	{
-		if (filesFragment != null)
-		{
-			filesFragment.getMvpDelegate().onDestroy();
-		}
-		if (settingsFragment != null)
-		{
-			settingsFragment.getMvpDelegate().onDestroy();
-		}
-		if (aboutFragment != null)
-		{
-			aboutFragment.getMvpDelegate().onDestroy();
-		}
-		finish();
-	}
+    private void switchFragment(MvpFragment fragment) {
+        getFragmentManager().beginTransaction()
+                .replace(R.id.main_fragment_container, fragment, contentFragmentTag)
+                .commitAllowingStateLoss();
+    }
 
-	private void switchFragment(MvpFragment fragment)
-	{
-		getFragmentManager().beginTransaction()
-				.replace(R.id.main_fragment_container, fragment, contentFragmentTag)
-				.commitAllowingStateLoss();
-	}
+    private boolean firstClickOnBack = false;
 
-	private boolean firstClickOnBack = false;
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            if (firstClickOnBack) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Click again to exit the app", Toast.LENGTH_LONG).show();
+                firstClickOnBack = true;
+                new Handler().postDelayed(() -> firstClickOnBack = false, 2000);
+            }
+        }
+    }
 
-	@Override
-	public void onBackPressed()
-	{
-		DrawerLayout drawer = findViewById(R.id.drawer_layout);
-		if (drawer.isDrawerOpen(GravityCompat.START))
-		{
-			drawer.closeDrawer(GravityCompat.START);
-		}
-		else
-		{
-			if (firstClickOnBack)
-			{
-				Intent intent = new Intent(Intent.ACTION_MAIN);
-				intent.addCategory(Intent.CATEGORY_HOME);
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(intent);
-			}
-			else
-			{
-				Toast.makeText(this, "Click again to exit the app", Toast.LENGTH_LONG).show();
-				firstClickOnBack = true;
-				new Handler().postDelayed(() -> firstClickOnBack = false, 2000);
-			}
-		}
-	}
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        BaseFragment baseFragment = (BaseFragment) getFragmentManager().findFragmentByTag(contentFragmentTag);
+        if (baseFragment != null && baseFragment.dispatchTouchEvent(event)) {
+            return true;
+        }
 
-	@Override
-	public boolean dispatchTouchEvent(MotionEvent event)
-	{
-		BaseFragment baseFragment = (BaseFragment) getFragmentManager().findFragmentByTag(contentFragmentTag);
-		if (baseFragment != null && baseFragment.dispatchTouchEvent(event))
-		{
-			return true;
-		}
+        return super.dispatchTouchEvent(event);
+    }
 
-		return super.dispatchTouchEvent(event);
-	}
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nav_home:
+                switchFiles();
+                break;
+            case R.id.nav_settings:
+                switchSettings();
+                break;
+            case R.id.nav_about:
+                switchAbout();
+                break;
+            case R.id.nav_logout:
+                logout();
+                break;
+        }
 
-	@SuppressWarnings("StatementWithEmptyBody")
-	@Override
-	public boolean onNavigationItemSelected(MenuItem item)
-	{
-		switch (item.getItemId())
-		{
-			case R.id.nav_home:
-				switchFiles();
-				break;
-			case R.id.nav_settings:
-				switchSettings();
-				break;
-			case R.id.nav_about:
-				switchAbout();
-				break;
-			case R.id.nav_logout:
-				logout();
-				break;
-		}
-
-		drawer.closeDrawer(GravityCompat.START);
-		return true;
-	}
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 }

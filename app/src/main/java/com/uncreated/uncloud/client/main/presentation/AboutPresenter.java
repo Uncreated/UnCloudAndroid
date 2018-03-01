@@ -5,7 +5,5 @@ import com.arellomobile.mvp.MvpPresenter;
 import com.uncreated.uncloud.client.main.ui.fragment.about.AboutView;
 
 @InjectViewState
-public class AboutPresenter
-		extends MvpPresenter<AboutView>
-{
+public class AboutPresenter extends MvpPresenter<AboutView> {
 }

@@ -8,18 +8,16 @@ import com.uncreated.uncloud.client.BaseView;
 
 import java.util.Set;
 
-public interface AuthView
-		extends BaseView
-{
-	@StateStrategyType(AddToEndSingleStrategy.class)
-	void addNames(Set<String> names);
+public interface AuthView extends BaseView {
+    @StateStrategyType(AddToEndSingleStrategy.class)
+    void addNames(Set<String> names);
 
-	@StateStrategyType(AddToEndSingleStrategy.class)
-	void setPassword(boolean lock);
+    @StateStrategyType(AddToEndSingleStrategy.class)
+    void setPassword(boolean lock);
 
-	@StateStrategyType(AddToEndSingleStrategy.class)
-	void setLogin(String login, boolean lock);
+    @StateStrategyType(AddToEndSingleStrategy.class)
+    void setLogin(String login, boolean lock);
 
-	@StateStrategyType(SkipStrategy.class)
-	void switchMainActivity();
+    @StateStrategyType(SkipStrategy.class)
+    void switchMainActivity();
 }
