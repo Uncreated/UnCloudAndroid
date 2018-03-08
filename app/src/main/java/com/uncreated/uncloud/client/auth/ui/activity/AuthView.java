@@ -10,7 +10,7 @@ import java.util.Set;
 
 public interface AuthView extends BaseView {
     @StateStrategyType(AddToEndSingleStrategy.class)
-    void addNames(Set<String> names);
+    void addNames(String[] names);
 
     @StateStrategyType(AddToEndSingleStrategy.class)
     void setPassword(boolean lock);

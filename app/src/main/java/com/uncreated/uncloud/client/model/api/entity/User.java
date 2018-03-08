@@ -1,5 +1,7 @@
 package com.uncreated.uncloud.client.model.api.entity;
 
+import com.uncreated.uncloud.client.model.auth.AuthInf;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8,17 +10,21 @@ public class User {
     private String login;
     private byte[] passwordHash;
 
-
     public User(String login, String password) {
         this.login = login;
         this.passwordHash = generatePasswordHash(password);
+    }
+
+    public User(AuthInf authInf) {
+        this.login = authInf.getLogin();
+        this.passwordHash = authInf.getPasswordHash();
     }
 
     public String getLogin() {
         return login;
     }
 
-    private static byte[] generatePasswordHash(String password) {
+    public static byte[] generatePasswordHash(String password) {
         try {
             //sha512(sha512(pass))
             byte[] passBytes = password.getBytes("UTF-8");

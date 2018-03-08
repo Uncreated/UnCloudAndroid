@@ -29,8 +29,8 @@ public class AuthPresenter extends MvpPresenter<AuthView> {
     }
 
     public void onBack() {
-        selectName(authManager.getLastKey());
-        getViewState().addNames(authManager.getKeys());
+        selectName(authManager.getLastName());
+        getViewState().addNames(authManager.getNames());
         getViewState().setLoading(false);
     }
 
@@ -70,7 +70,7 @@ public class AuthPresenter extends MvpPresenter<AuthView> {
             AuthInf authInf;
             if (withPass) {
                 if (password.length() > 0) {
-                    authInf = new AuthInf(new User(login, password), null);
+                    authInf = new AuthInf(login, User.generatePasswordHash(password), null);
                 } else {
                     getViewState().showError("Empty password");
                     return;

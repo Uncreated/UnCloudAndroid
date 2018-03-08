@@ -5,9 +5,10 @@ import com.uncreated.uncloud.client.model.api.entity.User;
 import com.uncreated.uncloud.client.model.auth.AuthInf;
 import com.uncreated.uncloud.client.model.storage.FileTransfer;
 import com.uncreated.uncloud.client.model.storage.FolderNode;
-import retrofit2.Retrofit;
 
 import java.io.IOException;
+
+import retrofit2.Retrofit;
 
 public class ApiClient {
     private UnCloudApi unCloudApi;
@@ -27,14 +28,14 @@ public class ApiClient {
         if (accessToken != null) {
             unCloudApi.putAuth(accessToken).enqueue(new CallbackApi<Session>()
                     .setOnCompleteEvent(callback.getOnCompleteEvent())
-                    .setOnFailedEvent(message -> auth(authInf.getUser(), callback)));
+                    .setOnFailedEvent(message -> authPass(authInf, callback)));
         } else {
-            auth(authInf.getUser(), callback);
+            authPass(authInf, callback);
         }
     }
 
-    private void auth(User user, CallbackApi<Session> callback) {
-        unCloudApi.postAuth(user).enqueue(callback);
+    private void authPass(AuthInf authInf, CallbackApi<Session> callback) {
+        unCloudApi.postAuth(new User(authInf)).enqueue(callback);
     }
 
     //Files

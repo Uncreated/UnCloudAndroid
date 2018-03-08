@@ -78,6 +78,4 @@ public class DialogControls extends Dialog {
         textView.setText(text);
         view.setOnClickListener(onClickListener);
     }
-
-
 }

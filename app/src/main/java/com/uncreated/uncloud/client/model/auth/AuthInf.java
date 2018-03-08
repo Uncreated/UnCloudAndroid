@@ -1,25 +1,40 @@
 package com.uncreated.uncloud.client.model.auth;
 
-import com.uncreated.uncloud.client.model.api.entity.User;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.Required;
 
-public class AuthInf {
-    private User user;
+public class AuthInf extends RealmObject {
+
+    @PrimaryKey
+    @Required
+    private String login;
+    private byte[] passwordHash;
     private String accessToken;
 
     public AuthInf() {
     }
 
-    public AuthInf(User user, String accessToken) {
-        this.user = user;
+    public AuthInf(String login, byte[] passwordHash, String accessToken) {
+        this.login = login;
+        this.passwordHash = passwordHash;
         this.accessToken = accessToken;
     }
 
-    public User getUser() {
-        return user;
+    public String getLogin() {
+        return login;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public byte[] getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(byte[] passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public String getAccessToken() {

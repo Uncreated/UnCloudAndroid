@@ -40,7 +40,7 @@ public class AuthActivity extends BaseActivity implements AuthView {
     private KeyListener loginKeyListener;
     private KeyListener passwordKeyListener;
 
-    private Set<String> names;
+    private String[] names;
 
     private AlertDialog alertDialog;
 
@@ -74,9 +74,9 @@ public class AuthActivity extends BaseActivity implements AuthView {
 
 
     @Override
-    public void addNames(Set<String> names) {
+    public void addNames(String[] names) {
         this.names = names;
-        if (names.size() == 0) {
+        if (names == null) {
             changeUserButton.setVisibility(View.INVISIBLE);
         }
     }
