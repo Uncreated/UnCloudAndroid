@@ -1,45 +1,20 @@
 package com.uncreated.uncloud.client.model.storage;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 public class FileTransfer {
-    private static final int PART_SIZE = 1048576;//1mb
+    public static final int PART_SIZE = 1048576;//1mb
 
     private String path;
-    private Integer part;
+    private int part;
+    private int parts;
     private byte[] data;
 
-    public void read(String rootFolder) throws IOException {
-        read(new File(rootFolder + path));
-    }
-
-    public void read(File file) throws IOException {
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-        randomAccessFile.seek((long) part * (long) PART_SIZE);
-        randomAccessFile.read(data);
-        randomAccessFile.close();
-    }
-
-    public void write(String rootFolder) throws IOException {
-        write(new File(rootFolder + path));
-    }
-
-    public void write(File file) throws IOException {
-        File parent = file.getParentFile();
-        if (!parent.exists()) {
-            parent.mkdirs();
-        }
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-        randomAccessFile.seek((long) part * (long) PART_SIZE);
-        randomAccessFile.write(data);
-        randomAccessFile.close();
-    }
-
-    public FileTransfer(String path, Integer part, int size) {
+    public FileTransfer(String path, int part, int size) {
         this.path = path;
         this.part = part;
+        this.parts = size / PART_SIZE;
+        if (size % PART_SIZE != 0) {
+            parts++;
+        }
         this.data = new byte[size];
     }
 
@@ -47,7 +22,7 @@ public class FileTransfer {
         return path;
     }
 
-    public Integer getPart() {
+    public int getPart() {
         return part;
     }
 
@@ -55,11 +30,7 @@ public class FileTransfer {
         return data;
     }
 
-    public static int getParts(long size) {
-        int parts = (int) (size / PART_SIZE);
-        if (size % PART_SIZE != 0) {
-            parts++;
-        }
+    public int getParts() {
         return parts;
     }
 

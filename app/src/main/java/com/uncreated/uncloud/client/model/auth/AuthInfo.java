@@ -4,7 +4,7 @@ import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
-public class AuthInf extends RealmObject {
+public class AuthInfo extends RealmObject {
 
     @PrimaryKey
     @Required
@@ -12,10 +12,10 @@ public class AuthInf extends RealmObject {
     private byte[] passwordHash;
     private String accessToken;
 
-    public AuthInf() {
+    public AuthInfo() {
     }
 
-    public AuthInf(String login, byte[] passwordHash, String accessToken) {
+    public AuthInfo(String login, byte[] passwordHash, String accessToken) {
         this.login = login;
         this.passwordHash = passwordHash;
         this.accessToken = accessToken;

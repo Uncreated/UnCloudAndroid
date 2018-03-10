@@ -1,11 +1,12 @@
 package com.uncreated.uncloud.client.model.api;
 
 import android.util.SparseArray;
+
+import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.io.IOException;
 
 public class CallbackApi<T> implements Callback<T> {
     private SparseArray<Runnable> handlers;

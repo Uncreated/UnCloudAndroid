@@ -1,8 +1,6 @@
 package com.uncreated.uncloud.client.model.api.entity;
 
 public class Session {
-    public static Session current;
-
     private String accessToken;
     private Long expiryDate;
 

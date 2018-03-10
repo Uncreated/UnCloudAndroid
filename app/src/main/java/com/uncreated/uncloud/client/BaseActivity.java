@@ -1,6 +1,7 @@
 package com.uncreated.uncloud.client;
 
 import android.os.Bundle;
+
 import com.arellomobile.mvp.MvpAppCompatActivity;
 
 public abstract class BaseActivity extends MvpAppCompatActivity implements BaseView {

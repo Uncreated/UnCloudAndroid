@@ -13,18 +13,20 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import com.arellomobile.mvp.MvpFragment;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.BaseFragment;
 import com.uncreated.uncloud.client.main.ui.fragment.about.AboutFragment;
 import com.uncreated.uncloud.client.main.ui.fragment.files.FilesFragment;
 import com.uncreated.uncloud.client.main.ui.fragment.settings.SettingsFragment;
-import com.uncreated.uncloud.client.model.api.entity.Session;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String contentFragmentTag = "content_fragment_tag";
+    public static final String KEY_LOGIN = "keyLogin";
 
     @BindView(R.id.nav_view)
     NavigationView navigationView;
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         TextView textView = navigationView.getHeaderView(0).findViewById(R.id.login_text_view);
-        textView.setText(Session.current.getLogin());
+        textView.setText(getIntent().getStringExtra(KEY_LOGIN));
 
         if (getFragmentManager().findFragmentByTag(contentFragmentTag) == null) {
             switchFiles();

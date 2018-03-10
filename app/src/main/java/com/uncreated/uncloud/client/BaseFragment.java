@@ -2,6 +2,7 @@ package com.uncreated.uncloud.client;
 
 import android.os.Bundle;
 import android.view.MotionEvent;
+
 import com.arellomobile.mvp.MvpFragment;
 
 public abstract class BaseFragment extends MvpFragment implements BaseView {

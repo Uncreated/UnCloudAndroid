@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.uncreated.uncloud.R;
 
 public class Base implements BaseView {

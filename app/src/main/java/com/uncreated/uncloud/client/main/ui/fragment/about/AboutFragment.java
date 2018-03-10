@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.BaseFragment;

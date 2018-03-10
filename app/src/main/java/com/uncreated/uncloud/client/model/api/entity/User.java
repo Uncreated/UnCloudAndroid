@@ -1,6 +1,6 @@
 package com.uncreated.uncloud.client.model.api.entity;
 
-import com.uncreated.uncloud.client.model.auth.AuthInf;
+import com.uncreated.uncloud.client.model.auth.AuthInfo;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -15,9 +15,9 @@ public class User {
         this.passwordHash = generatePasswordHash(password);
     }
 
-    public User(AuthInf authInf) {
-        this.login = authInf.getLogin();
-        this.passwordHash = authInf.getPasswordHash();
+    public User(AuthInfo authInfo) {
+        this.login = authInfo.getLogin();
+        this.passwordHash = authInfo.getPasswordHash();
     }
 
     public String getLogin() {

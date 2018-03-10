@@ -1,31 +1,40 @@
 package com.uncreated.uncloud.client.model.storage;
 
+import com.uncreated.uncloud.client.model.fileloader.CallbackLoader;
 
-import com.uncreated.uncloud.client.model.Model;
-import com.uncreated.uncloud.client.model.api.entity.Session;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class Storage {
     private String rootFolder;
+    private String login;
 
     public Storage(String rootFolder) {
         this.rootFolder = rootFolder;
     }
 
-    private String makeFullPath(String... sequence) {
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String makeFullPath(String... sequence) {
         StringBuilder stringBuilder = new StringBuilder(rootFolder);
-        stringBuilder.append(Session.current.getLogin());
+        stringBuilder.append(login);
         for (String seq : sequence) {
             stringBuilder.append(seq);
         }
         return stringBuilder.toString();
     }
 
-    public FolderNode getFiles(String login) throws FileNotFoundException {
+    public FolderNode getFiles() throws FileNotFoundException {
         File userFolder = new File(rootFolder + login);
         if (!userFolder.exists()) {
             userFolder.mkdir();
@@ -34,7 +43,7 @@ public class Storage {
         return new FolderNode(userFolder);
     }
 
-    public void copyFile(FolderNode curFolder, CallbackStorage callback, File... files) {
+    public void copyFile(FolderNode curFolder, CallbackLoader callback, File... files) {
         try {
             for (File source : files) {
                 File dest = new File(makeFullPath(curFolder.getFilePath(), source.getName()));
@@ -51,19 +60,11 @@ public class Storage {
         }
     }
 
-    public void write(FileTransfer fileTransfer) throws IOException {
-        fileTransfer.write(makeFullPath());
+    public boolean createPath(String folderPath) {
+        return new File(makeFullPath(folderPath)).mkdirs();
     }
 
-    public void createPath(String folderPath) {
-        new File(makeFullPath(folderPath)).mkdirs();
-    }
-
-    public void read(FileTransfer fileTransfer, String path) throws IOException {
-        fileTransfer.read(new File(makeFullPath(path)));
-    }
-
-    public void removeFile(String login, String filePath, CallbackStorage callback) {
+    public void removeFile(String filePath, CallbackLoader callback) {
         new Thread(() ->
         {
             try {
@@ -85,140 +86,34 @@ public class Storage {
         }).start();
     }
 
-    public void createFolder(String login, String path) throws IOException {
-        File file = new File(rootFolder + login + path);
-        if (!file.exists()) {
-            if (!file.mkdirs()) {
-                throw new IOException("Can not create folder " + path);
-            }
-        }
+    public void read(FileTransfer fileTransfer) throws IOException {
+        RandomAccessFile randomAccessFile = new RandomAccessFile(getFile(fileTransfer), "r");
+        randomAccessFile.seek((long) fileTransfer.getPart() * (long) FileTransfer.PART_SIZE);
+        randomAccessFile.read(fileTransfer.getData());
+        randomAccessFile.close();
     }
 
-    public void downloadFile(FileNode fileNode, CallbackStorage callback) {
-        new Thread(() ->
-        {
-            if (downloadFile(fileNode)) {
-                callback.onCompletePost();
-            } else {
-                callback.onFailedPost("Download failed:\n" + fileNode.getFilePath());
-            }
-        }).start();
+    public void write(FileTransfer fileTransfer) throws IOException {
+        File file = getFile(fileTransfer);
+        File parent = file.getParentFile();
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+        randomAccessFile.seek((long) fileTransfer.getPart() * (long) FileTransfer.PART_SIZE);
+        randomAccessFile.write(fileTransfer.getData());
+        randomAccessFile.close();
     }
 
-    private boolean downloadFile(FileNode fileNode) {
-        String path = fileNode.getFilePath();
-        int parts = fileNode.getParts();
-        for (int i = 0; i < parts || i == 0; i++) {
-            try {
-                FileTransfer fileTransfer = Model.getApiClient().getFile(path, i);
-                if (fileTransfer == null) {
-                    return false;
-                }
-                write(fileTransfer);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-        return true;
+    private File getFile(FileTransfer fileTransfer) {
+        return new File(makeFullPath(fileTransfer.getPath()));
     }
 
-    public void downloadFolder(FolderNode folderNode, CallbackStorage callback) {
-        new Thread(() ->
-        {
-            if (downloadFolder(folderNode)) {
-                callback.onCompletePost();
-            } else {
-                callback.onFailedPost("Download failed:\n" + folderNode.getFilePath());
-            }
-        }).start();
-    }
-
-    private boolean downloadFolder(FolderNode folderNode) {
-        if (!folderNode.isOnClient()) {
-            createPath(folderNode.getFilePath());
+    public long getFileSize(String path){
+        File file = new File(makeFullPath(path));
+        if(file!=null){
+            return file.length();
         }
-        for (FolderNode folder : folderNode.getFolders()) {
-            if (!downloadFolder(folder)) {
-                return false;
-            }
-        }
-
-        for (FileNode fileNode : folderNode.getFiles()) {
-            if (!fileNode.isOnClient()) {
-                if (!downloadFile(fileNode)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    public void uploadFile(FileNode fileNode, CallbackStorage callback) {
-        new Thread(() ->
-        {
-            if (uploadFile(fileNode)) {
-                callback.onCompletePost();
-            } else {
-                callback.onFailedPost("Upload failed:\n" + fileNode.getFilePath());
-            }
-        }).start();
-    }
-
-    private boolean uploadFile(FileNode fileNode) {
-        String path = fileNode.getFilePath();
-        int szi = fileNode.getParts();
-        for (int i = 0; i < szi || i == 0; i++) {
-            try {
-                FileTransfer fileTransfer = new FileTransfer(path, i, FileTransfer.getSizeOfPart(fileNode.getSize(), i));
-                read(fileTransfer, path);
-                if (!Model.getApiClient().postFile(fileTransfer)) {
-                    return false;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public void uploadFolder(FolderNode folderNode, CallbackStorage callback) {
-        new Thread(() ->
-        {
-            if (uploadFolder(folderNode)) {
-                callback.onCompletePost();
-            } else {
-                callback.onFailedPost("Upload failed:\n" + folderNode.getFilePath());
-            }
-        }).start();
-    }
-
-    private boolean uploadFolder(FolderNode folderNode) {
-        if (!folderNode.isOnServer()) {
-            try {
-                if (!Model.getApiClient().postFolder(folderNode.getFilePath())) {
-                    return false;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        for (FolderNode folder : folderNode.getFolders()) {
-            if (!uploadFolder(folder)) {
-                return false;
-            }
-        }
-
-        for (FileNode fileNode : folderNode.getFiles()) {
-            if (!fileNode.isOnServer()) {
-                if (!uploadFile(fileNode)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return 0;
     }
 }

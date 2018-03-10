@@ -47,10 +47,6 @@ public class FileNode implements Comparable<FileNode> {
         return size;
     }
 
-    public int getParts() {
-        return FileTransfer.getParts(size);
-    }
-
     public String getFilePath() {
         StringBuilder builder = new StringBuilder(name);
         builder.insert(0, "/");

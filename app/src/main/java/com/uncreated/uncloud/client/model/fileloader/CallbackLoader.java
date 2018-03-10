@@ -1,14 +1,14 @@
-package com.uncreated.uncloud.client.model.storage;
+package com.uncreated.uncloud.client.model.fileloader;
 
 import android.os.Handler;
 import android.os.Looper;
 
 
-public class CallbackStorage {
+public class CallbackLoader {
     private OnCompleteEvent onCompleteEvent;
     private OnFailedEvent onFailedEvent;
 
-    public CallbackStorage(OnCompleteEvent onCompleteEvent, OnFailedEvent onFailedEvent) {
+    public CallbackLoader(OnCompleteEvent onCompleteEvent, OnFailedEvent onFailedEvent) {
         this.onCompleteEvent = onCompleteEvent;
         this.onFailedEvent = onFailedEvent;
     }

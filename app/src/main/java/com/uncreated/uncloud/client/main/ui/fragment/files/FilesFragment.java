@@ -14,8 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.PresenterType;
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -27,6 +26,9 @@ import com.uncreated.uncloud.client.main.presentation.FilesPresenter;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 

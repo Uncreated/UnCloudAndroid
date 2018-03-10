@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.uncreated.uncloud">
+    package="com.uncreated.uncloud">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".client.App"
@@ -16,14 +16,19 @@
         android:theme="@style/CloudTheme">
         <activity android:name=".client.auth.ui.activity.AuthActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".client.main.ui.activity.MainActivity"
-            android:theme="@style/CloudTheme.NoActionBar"/>
+            android:theme="@style/CloudTheme.NoActionBar" />
+
+        <service
+            android:name=".client.service.LoaderService"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

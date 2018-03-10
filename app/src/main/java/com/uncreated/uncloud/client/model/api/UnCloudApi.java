@@ -4,8 +4,15 @@ import com.uncreated.uncloud.client.model.api.entity.Session;
 import com.uncreated.uncloud.client.model.api.entity.User;
 import com.uncreated.uncloud.client.model.storage.FileTransfer;
 import com.uncreated.uncloud.client.model.storage.FolderNode;
+
 import retrofit2.Call;
-import retrofit2.http.*;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Query;
 
 public interface UnCloudApi {
     //Auth

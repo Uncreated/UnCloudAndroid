@@ -8,7 +8,7 @@ import com.uncreated.uncloud.client.model.api.ApiClient;
 import com.uncreated.uncloud.client.model.api.CallbackApi;
 import com.uncreated.uncloud.client.model.api.entity.Session;
 import com.uncreated.uncloud.client.model.api.entity.User;
-import com.uncreated.uncloud.client.model.auth.AuthInf;
+import com.uncreated.uncloud.client.model.auth.AuthInfo;
 import com.uncreated.uncloud.client.model.auth.AuthManager;
 
 @InjectViewState
@@ -48,7 +48,7 @@ public class AuthPresenter extends MvpPresenter<AuthView> {
         if (login.length() > 0) {
             if (password.length() > 0) {
                 getViewState().setLoading(true);
-                apiClient.register(new User(login, password), new CallbackApi<Void>()
+                apiClient.registerAsync(new User(login, password), new CallbackApi<Void>()
                         .setOnCompleteEvent(body ->
                         {
                             getViewState().setLoading(false);
@@ -67,25 +67,24 @@ public class AuthPresenter extends MvpPresenter<AuthView> {
 
     public void onAuth(String login, String password) {
         if (login.length() > 0) {
-            AuthInf authInf;
+            AuthInfo authInfo;
             if (withPass) {
                 if (password.length() > 0) {
-                    authInf = new AuthInf(login, User.generatePasswordHash(password), null);
+                    authInfo = new AuthInfo(login, User.generatePasswordHash(password), null);
                 } else {
                     getViewState().showError("Empty password");
                     return;
                 }
             } else {
-                authInf = authManager.get(login);
+                authInfo = authManager.get(login);
             }
             getViewState().setLoading(true);
-            apiClient.auth(authInf, new CallbackApi<Session>()
-                    .setOnCompleteEvent(body ->
-                    {
-                        Session.current = body;
-                        authInf.setAccessToken(body.getAccessToken());
-                        authManager.save(authInf);
-                        getViewState().switchMainActivity();
+            apiClient.authAsync(authInfo, new CallbackApi<Session>()
+                    .setOnCompleteEvent(body -> {
+                        Model.onAuthorized(body);
+                        authManager.save(authInfo, body.getAccessToken());
+                        getViewState().switchMainActivity(body.getLogin());
+                        getViewState().setLoading(false);
                     })
                     .setOnFailedEvent(this::onFailed)
                     .add(400, this::onBadRequest)

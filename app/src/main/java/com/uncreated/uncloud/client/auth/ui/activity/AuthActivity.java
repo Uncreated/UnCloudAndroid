@@ -10,8 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.PresenterType;
 import com.uncreated.uncloud.R;
@@ -19,7 +18,8 @@ import com.uncreated.uncloud.client.BaseActivity;
 import com.uncreated.uncloud.client.auth.presentation.AuthPresenter;
 import com.uncreated.uncloud.client.main.ui.activity.MainActivity;
 
-import java.util.Set;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class AuthActivity extends BaseActivity implements AuthView {
     @BindView(R.id.login_edit_text)
@@ -69,7 +69,6 @@ public class AuthActivity extends BaseActivity implements AuthView {
 
         loginEditText.setFilters(filters);
         passwordEditText.setFilters(filters);
-
     }
 
 
@@ -137,8 +136,9 @@ public class AuthActivity extends BaseActivity implements AuthView {
     }
 
     @Override
-    public void switchMainActivity() {
+    public void switchMainActivity(String login) {
         Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(MainActivity.KEY_LOGIN, login);
         startActivityForResult(intent, 0);
     }
 
