@@ -65,26 +65,15 @@ public class Storage {
         return folder.exists() || folder.mkdirs();
     }
 
-    public void removeFile(String filePath, CallbackLoader callback) {
-        new Thread(() ->
-        {
-            try {
-                File file = new File(rootFolder + login + filePath);
+    public boolean remove(String filePath) throws IOException {
+        File file = new File(rootFolder + login + filePath);
 
-                if (file.isDirectory()) {
-                    FileUtils.deleteDirectory(file);
-                    callback.onCompletePost();
-                    return;
-                } else if (file.delete()) {
-                    callback.onCompletePost();
-                    return;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            callback.onFailedPost("Can not delete:\n" + filePath);
-        }).start();
+        if (file.isDirectory()) {
+            FileUtils.deleteDirectory(file);
+        } else {
+            file.delete();
+        }
+        return file.exists();
     }
 
     public void read(FileTransfer fileTransfer) throws IOException {
@@ -112,9 +101,6 @@ public class Storage {
 
     public long getFileSize(String path) {
         File file = new File(makeFullPath(path));
-        if (file != null) {
-            return file.length();
-        }
-        return 0;
+        return file.length();
     }
 }

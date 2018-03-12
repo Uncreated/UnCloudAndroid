@@ -9,9 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
 public class LoaderService extends Service {
-    public static final String KEY_LOGIN = "keyLogin";
-    public static final String KEY_ACCESS_TOKEN = "keyAccessToken";
-
     private ServiceBinder binder = new ServiceBinder();
     private LoaderTaskManager loaderTaskManager;
 
@@ -26,11 +23,6 @@ public class LoaderService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
     }
 
     public void onNotification(String login, String path) {

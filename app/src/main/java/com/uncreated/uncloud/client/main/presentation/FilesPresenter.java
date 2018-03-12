@@ -6,7 +6,6 @@ import com.uncreated.uncloud.client.main.ui.fragment.files.FilesView;
 import com.uncreated.uncloud.client.model.Model;
 import com.uncreated.uncloud.client.model.api.ApiClient;
 import com.uncreated.uncloud.client.model.api.CallbackApi;
-import com.uncreated.uncloud.client.model.fileloader.CallbackLoader;
 import com.uncreated.uncloud.client.model.storage.FileNode;
 import com.uncreated.uncloud.client.model.storage.FolderNode;
 import com.uncreated.uncloud.client.model.storage.Storage;
@@ -36,7 +35,7 @@ public class FilesPresenter extends MvpPresenter<FilesView> {
 
         loaderSubscriber = new LoaderSubscriber(storage.getLogin()) {
             @Override
-            protected void onResult(String errorMessage) {
+            public void onResult(String errorMessage) {
                 if (errorMessage == null) {
                     updateFiles();
                 } else {
@@ -45,13 +44,11 @@ public class FilesPresenter extends MvpPresenter<FilesView> {
             }
         };
 
-        getViewState().setLoading(true);
+        dialogAction();
 
         loaderTaskManager = Model.getLoaderTaskManager();
         if (!loaderTaskManager.subscribeMe(loaderSubscriber)) {
             updateFiles();
-        } else {
-            getViewState().setLoading(true);
         }
     }
 
@@ -86,38 +83,36 @@ public class FilesPresenter extends MvpPresenter<FilesView> {
     public void download(FileInfo fileInfo) {
         dialogAction();
 
-        boolean task;
         if (fileInfo.isDirectory()) {
-            task = loaderTaskManager.taskDownloadFolder(getFileNode(fileInfo), loaderSubscriber);
+            if (!loaderTaskManager.taskDownloadFolder(loaderSubscriber, getFileNode(fileInfo))) {
+                showError("Failed to start downloading folder:\n" + fileInfo.getName());
+            }
         } else {
-            task = loaderTaskManager.taskDownloadFile(getFileNode(fileInfo), loaderSubscriber);
-        }
-        if (!task) {
-            getViewState().setLoading(false);
-            showError("Failed");
+            if (!loaderTaskManager.taskDownloadFile(loaderSubscriber, getFileNode(fileInfo))) {
+                showError("Failed to start downloading file:\n" + fileInfo.getName());
+            }
         }
     }
 
     public void upload(FileInfo fileInfo) {
         dialogAction();
 
-        boolean task;
         if (fileInfo.isDirectory()) {
-            task = loaderTaskManager.taskUploadFolder(getFileNode(fileInfo), loaderSubscriber);
+            if (!loaderTaskManager.taskUploadFolder(loaderSubscriber, getFileNode(fileInfo))) {
+                showError("Failed to start uploading folder:\n" + fileInfo.getName());
+            }
         } else {
-            task = loaderTaskManager.taskUploadFile(getFileNode(fileInfo), loaderSubscriber);
-        }
-        if (!task) {
-            getViewState().setLoading(false);
-            showError("Failed");
+            if (!loaderTaskManager.taskUploadFile(loaderSubscriber, getFileNode(fileInfo))) {
+                showError("Failed to start uploading file:\n" + fileInfo.getName());
+            }
         }
     }
 
     public void deleteFileFromClient(FileInfo fileInfo) {
         dialogAction();
-
-        storage.removeFile(getFileNode(fileInfo).getFilePath(),
-                new CallbackLoader(this::updateFiles, this::showError));
+        if (!loaderTaskManager.taskRemoveClient(loaderSubscriber, getFileNode(fileInfo))) {
+            showError("Failed to start removing file:\n" + fileInfo.getName());
+        }
     }
 
     public void deleteFileFromServer(FileInfo fileInfo) {
@@ -183,8 +178,10 @@ public class FilesPresenter extends MvpPresenter<FilesView> {
     }
 
     public void copyFile(File... files) {
-        getViewState().setLoading(true);
-        storage.copyFile(curFolder, new CallbackLoader(this::updateFiles, this::showError), files);
+        dialogAction();
+        if (loaderTaskManager.taskCopy(loaderSubscriber, files)) {
+            showError("Failed to start copying files");
+        }
     }
 
     public void createFolder(String name) {

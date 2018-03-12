@@ -8,25 +8,30 @@ import com.uncreated.uncloud.client.model.fileloader.FileLoader;
 import com.uncreated.uncloud.client.model.storage.FileNode;
 import com.uncreated.uncloud.client.model.storage.FolderNode;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.HashMap;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
 
+import static com.uncreated.uncloud.client.service.LoaderCommand.ACTION_DELETE;
 import static com.uncreated.uncloud.client.service.LoaderCommand.ACTION_DOWNLOAD;
 import static com.uncreated.uncloud.client.service.LoaderCommand.ACTION_UPLOAD;
 import static com.uncreated.uncloud.client.service.LoaderCommand.OBJ_FILE;
 import static com.uncreated.uncloud.client.service.LoaderCommand.OBJ_FOLDER;
 
+/*
+Задачи пользователя разбиваются на команды (LoaderCommand) и сохраняются в бд
+После выполнения каждой задачи запись из БД удаляется
+При прерывании выполнения задачи, после перезапуска работа возобновляется
+ */
 public class LoaderTaskManager {
     private LoaderService loaderService;
     private FileLoader fileLoader;
 
     private HashMap<String, LoaderSubscriber> subscribers = new HashMap<>();
     private Realm realm;
-    private Worker worker;
+    private LoaderWorker worker;
     private AuthManager authManager;
 
     LoaderTaskManager(LoaderService loaderService) {
@@ -47,40 +52,62 @@ public class LoaderTaskManager {
         LoaderCommand loaderCommand = realm.where(LoaderCommand.class).findFirst();
         if (loaderCommand != null && (worker == null || worker.getStatus() != AsyncTask.Status.RUNNING)) {
             AuthInfo authInfo = authManager.get(loaderCommand.getLogin());
-            fileLoader.setUser(authInfo.getLogin(), authInfo.getAccessToken());
-            worker = new Worker(authInfo);
+            worker = new LoaderWorker(fileLoader, authInfo);
+            worker.setOnProgressListener(loaderService::onNotification);
+            worker.setOnPostListener(this::workerFinished);
             worker.execute();
         }
     }
 
-    public boolean taskDownloadFile(FileNode fileNode, LoaderSubscriber loaderSubscriber) {
-        return task(fileNode, loaderSubscriber, ACTION_DOWNLOAD);
+    private void workerFinished(String login) {
+        LoaderSubscriber loaderSubscriber = subscribers.remove(login);
+        if (loaderSubscriber != null) {
+            loaderSubscriber.onResult(null);
+        }
+        startWorker();
     }
 
-    public boolean taskUploadFile(FileNode fileNode, LoaderSubscriber loaderSubscriber) {
-        return task(fileNode, loaderSubscriber, LoaderCommand.ACTION_UPLOAD);
+    public boolean taskDownloadFile(LoaderSubscriber loaderSubscriber, FileNode... fileNodes) {
+        return task(loaderSubscriber, ACTION_DOWNLOAD, fileNodes);
     }
 
-    public boolean taskDownloadFolder(FolderNode folderNode, LoaderSubscriber loaderSubscriber) {
-        return task(folderNode, loaderSubscriber, ACTION_DOWNLOAD);
+    public boolean taskUploadFile(LoaderSubscriber loaderSubscriber, FileNode... fileNodes) {
+        return task(loaderSubscriber, ACTION_UPLOAD, fileNodes);
     }
 
-    public boolean taskUploadFolder(FolderNode folderNode, LoaderSubscriber loaderSubscriber) {
-        return task(folderNode, loaderSubscriber, LoaderCommand.ACTION_UPLOAD);
+    public boolean taskDownloadFolder(LoaderSubscriber loaderSubscriber, FolderNode... folderNodes) {
+        return task(loaderSubscriber, ACTION_DOWNLOAD, folderNodes);
     }
 
-    private boolean task(FileNode fNode, LoaderSubscriber loaderSubscriber, int actionType) {
+    public boolean taskUploadFolder(LoaderSubscriber loaderSubscriber, FolderNode... folderNodes) {
+        return task(loaderSubscriber, ACTION_UPLOAD, folderNodes);
+    }
+
+    public boolean taskRemoveClient(LoaderSubscriber loaderSubscriber, FileNode... fileNodes) {
+        return task(loaderSubscriber, ACTION_DELETE, fileNodes);
+    }
+
+    //Ещё добавить путь куда копировать
+    public boolean taskCopy(LoaderSubscriber loaderSubscriber, File... files) {
+        //return task(loaderSubscriber, ACTION_COPY, files);
+        return false;
+    }
+
+    private boolean task(LoaderSubscriber loaderSubscriber, int actionType, FileNode... fNodes) {
         if (!isTaskEmpty(loaderSubscriber.getLogin()))
             return false;
 
         subscribers.put(loaderSubscriber.getLogin(), loaderSubscriber);
 
-        realm.beginTransaction();
-        if (fNode instanceof FolderNode)
-            addFolder(actionType, loaderSubscriber.getLogin(), (FolderNode) fNode);
-        else
-            addFile(actionType, loaderSubscriber.getLogin(), fNode);
-        realm.commitTransaction();
+        realm.executeTransaction(realm1 -> {
+            for (FileNode fNode : fNodes) {
+                if (actionType == ACTION_DELETE || !(fNode instanceof FolderNode)) {
+                    addFile(actionType, loaderSubscriber.getLogin(), fNode);
+                } else {
+                    addFolder(actionType, loaderSubscriber.getLogin(), (FolderNode) fNode);
+                }
+            }
+        });
 
         startWorker();
 
@@ -88,17 +115,11 @@ public class LoaderTaskManager {
     }
 
     private void addFile(int actionType, String login, FileNode fileNode) {
-        if (actionType == ACTION_DOWNLOAD && fileNode.isOnServer() ||
-                actionType == LoaderCommand.ACTION_UPLOAD && fileNode.isOnClient()) {
-            realm.insert(new LoaderCommand(actionType, OBJ_FILE, login, fileNode.getFilePath()));
-        }
+        realm.insert(new LoaderCommand(actionType, OBJ_FILE, login, fileNode.getFilePath()));
     }
 
     private void addFolder(int actionType, String login, FolderNode folderNode) {
-        if (actionType == ACTION_DOWNLOAD && folderNode.isOnServer() ||
-                actionType == LoaderCommand.ACTION_UPLOAD && folderNode.isOnClient()) {
-            realm.insert(new LoaderCommand(actionType, OBJ_FOLDER, login, folderNode.getFilePath()));
-        }
+        realm.insert(new LoaderCommand(actionType, OBJ_FOLDER, login, folderNode.getFilePath()));
         for (FileNode fileNode : folderNode.getFiles()) {
             addFile(actionType, login, fileNode);
         }
@@ -123,82 +144,5 @@ public class LoaderTaskManager {
         return realm.where(LoaderCommand.class)
                 .equalTo("login", login)
                 .findFirst();
-    }
-
-    class Worker extends AsyncTask<String, String, String> {
-        private String login;
-
-        Worker(AuthInfo authInfo) {
-            this.login = authInfo.getLogin();
-            fileLoader.setUser(login, authInfo.getAccessToken());
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-
-            loaderService.onNotification(values[0], values[1]);
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            Realm realm = Realm.getInstance(new RealmConfiguration.Builder()
-                    .name("UnCloud.LoaderTaskManager")
-                    .schemaVersion(1)
-                    .build());
-            RealmResults<LoaderCommand> loaderCommands = realm.where(LoaderCommand.class)
-                    .equalTo("login", login)
-                    .findAll();
-            while (loaderCommands.size() > 0) {
-                try {
-                    doCommand(loaderCommands.first());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                realm.executeTransaction(realm1 -> loaderCommands.deleteFirstFromRealm());
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-
-            LoaderSubscriber loaderSubscriber = subscribers.remove(login);
-            if (loaderSubscriber != null) {
-                loaderSubscriber.sendResult(s);
-            }
-            startWorker();
-        }
-
-        private void doCommand(LoaderCommand loaderCommand) throws IOException {
-            String path = loaderCommand.getPath();
-            switch (loaderCommand.getActionType()) {
-                case ACTION_DOWNLOAD:
-                    if (loaderCommand.getObjType() == OBJ_FILE) {
-                        if (!fileLoader.downloadFile(path)) {
-                            throw new IOException("Can't download file:\n" + path);
-                        }
-                    } else {
-                        if (!fileLoader.getStorage().createPath(path)) {
-                            throw new IOException("Can't download folder:\n" + path);
-                        }
-                    }
-                    break;
-                case ACTION_UPLOAD:
-                    if (loaderCommand.getObjType() == OBJ_FILE) {
-                        if (!fileLoader.uploadFile(path)) {
-                            throw new IOException("Can't upload file:\n" + path);
-                        }
-                    } else if (loaderCommand.getObjType() == OBJ_FOLDER) {
-                        if (!fileLoader.getApiClient().postFolder(path)) {
-                            throw new IOException("Can't upload folder:\n" + path);
-                        }
-                    }
-                    break;
-            }
-
-            publishProgress(loaderCommand.getLogin(), loaderCommand.getPath());
-        }
     }
 }

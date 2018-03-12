@@ -1,10 +1,9 @@
 package com.uncreated.uncloud.client.service;
 
-
 public abstract class LoaderSubscriber {
     private String login;
 
-    public LoaderSubscriber(String login) {
+    protected LoaderSubscriber(String login) {
         this.login = login;
     }
 
@@ -12,13 +11,5 @@ public abstract class LoaderSubscriber {
         return login;
     }
 
-    protected abstract void onResult(String errorMessage);
-
-    void sendResult(String errorMessage) {
-        try {
-            onResult(errorMessage);
-        } catch (Exception e) {
-            //bad idea
-        }
-    }
+    public abstract void onResult(String errorMessage);
 }

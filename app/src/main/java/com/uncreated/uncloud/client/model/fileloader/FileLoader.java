@@ -52,6 +52,7 @@ public class FileLoader {
         int i = 0;
         do {
             fileTransfer = new FileTransfer(path, i, FileTransfer.getSizeOfPart(size, i));
+            storage.read(fileTransfer);
             if (!Model.getApiClient().postFile(fileTransfer)) {
                 return false;
             }
