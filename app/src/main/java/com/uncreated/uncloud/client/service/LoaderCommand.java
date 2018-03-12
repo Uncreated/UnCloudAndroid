@@ -9,30 +9,40 @@ import io.realm.RealmObject;
 чтобы не потерять прогресс выполнения
  */
 public class LoaderCommand extends RealmObject {
-    static final int FILE_DOWNLOAD = 1;
-    static final int FOLDER_DOWNLOAD = 2;
-    static final int FILE_UPLOAD = 3;
-    static final int FOLDER_UPLOAD = 4;
+    static final int OBJ_FILE = 1;
+    static final int OBJ_FOLDER = 2;
+    static final int ACTION_DOWNLOAD = 1;
+    static final int ACTION_UPLOAD = 2;
 
-    private int type;
+    private int actionType;
+    private int objType;
     private String login;
-    private String path;//file or folder path
+    private String path;
 
     public LoaderCommand() {
     }
 
-    public LoaderCommand(int type, String login, String path) {
-        this.type = type;
+    public LoaderCommand(int actionType, int objType, String login, String path) {
+        this.actionType = actionType;
+        this.objType = objType;
         this.login = login;
         this.path = path;
     }
 
-    public int getType() {
-        return type;
+    public int getActionType() {
+        return actionType;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setActionType(int actionType) {
+        this.actionType = actionType;
+    }
+
+    public int getObjType() {
+        return objType;
+    }
+
+    public void setObjType(int objType) {
+        this.objType = objType;
     }
 
     public String getLogin() {

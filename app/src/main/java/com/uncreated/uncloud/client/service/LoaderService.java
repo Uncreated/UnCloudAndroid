@@ -22,18 +22,6 @@ public class LoaderService extends Service {
         loaderTaskManager = new LoaderTaskManager(this);
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) {
-            //Restart
-
-
-        } else {
-
-        }
-        return START_STICKY;
-    }
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {

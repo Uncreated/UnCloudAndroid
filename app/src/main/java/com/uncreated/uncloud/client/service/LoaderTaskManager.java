@@ -15,6 +15,11 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
+import static com.uncreated.uncloud.client.service.LoaderCommand.ACTION_DOWNLOAD;
+import static com.uncreated.uncloud.client.service.LoaderCommand.ACTION_UPLOAD;
+import static com.uncreated.uncloud.client.service.LoaderCommand.OBJ_FILE;
+import static com.uncreated.uncloud.client.service.LoaderCommand.OBJ_FOLDER;
+
 public class LoaderTaskManager {
     private LoaderService loaderService;
     private FileLoader fileLoader;
@@ -49,22 +54,22 @@ public class LoaderTaskManager {
     }
 
     public boolean taskDownloadFile(FileNode fileNode, LoaderSubscriber loaderSubscriber) {
-        return task(fileNode, loaderSubscriber, LoaderCommand.FILE_DOWNLOAD);
+        return task(fileNode, loaderSubscriber, ACTION_DOWNLOAD);
     }
 
     public boolean taskUploadFile(FileNode fileNode, LoaderSubscriber loaderSubscriber) {
-        return task(fileNode, loaderSubscriber, LoaderCommand.FILE_UPLOAD);
+        return task(fileNode, loaderSubscriber, LoaderCommand.ACTION_UPLOAD);
     }
 
     public boolean taskDownloadFolder(FolderNode folderNode, LoaderSubscriber loaderSubscriber) {
-        return task(folderNode, loaderSubscriber, LoaderCommand.FOLDER_DOWNLOAD);
+        return task(folderNode, loaderSubscriber, ACTION_DOWNLOAD);
     }
 
     public boolean taskUploadFolder(FolderNode folderNode, LoaderSubscriber loaderSubscriber) {
-        return task(folderNode, loaderSubscriber, LoaderCommand.FOLDER_UPLOAD);
+        return task(folderNode, loaderSubscriber, LoaderCommand.ACTION_UPLOAD);
     }
 
-    private boolean task(FileNode fNode, LoaderSubscriber loaderSubscriber, int type) {
+    private boolean task(FileNode fNode, LoaderSubscriber loaderSubscriber, int actionType) {
         if (!isTaskEmpty(loaderSubscriber.getLogin()))
             return false;
 
@@ -72,9 +77,9 @@ public class LoaderTaskManager {
 
         realm.beginTransaction();
         if (fNode instanceof FolderNode)
-            addFolder(type, loaderSubscriber.getLogin(), (FolderNode) fNode);
+            addFolder(actionType, loaderSubscriber.getLogin(), (FolderNode) fNode);
         else
-            addFile(type, loaderSubscriber.getLogin(), fNode);
+            addFile(actionType, loaderSubscriber.getLogin(), fNode);
         realm.commitTransaction();
 
         startWorker();
@@ -82,23 +87,23 @@ public class LoaderTaskManager {
         return true;
     }
 
-    private void addFile(int type, String login, FileNode fileNode) {
-        if (type == LoaderCommand.FILE_DOWNLOAD && fileNode.isOnServer() ||
-                type == LoaderCommand.FILE_UPLOAD && fileNode.isOnClient()) {
-            realm.insert(new LoaderCommand(type, login, fileNode.getFilePath()));
+    private void addFile(int actionType, String login, FileNode fileNode) {
+        if (actionType == ACTION_DOWNLOAD && fileNode.isOnServer() ||
+                actionType == LoaderCommand.ACTION_UPLOAD && fileNode.isOnClient()) {
+            realm.insert(new LoaderCommand(actionType, OBJ_FILE, login, fileNode.getFilePath()));
         }
     }
 
-    private void addFolder(int type, String login, FolderNode folderNode) {
-        if (type == LoaderCommand.FOLDER_DOWNLOAD && folderNode.isOnServer() ||
-                type == LoaderCommand.FOLDER_UPLOAD && folderNode.isOnClient()) {
-            realm.insert(new LoaderCommand(type, login, folderNode.getFilePath()));
+    private void addFolder(int actionType, String login, FolderNode folderNode) {
+        if (actionType == ACTION_DOWNLOAD && folderNode.isOnServer() ||
+                actionType == LoaderCommand.ACTION_UPLOAD && folderNode.isOnClient()) {
+            realm.insert(new LoaderCommand(actionType, OBJ_FOLDER, login, folderNode.getFilePath()));
         }
         for (FileNode fileNode : folderNode.getFiles()) {
-            addFile(type, login, fileNode);
+            addFile(actionType, login, fileNode);
         }
         for (FolderNode folderNode1 : folderNode.getFolders()) {
-            addFolder(type, login, folderNode1);
+            addFolder(actionType, login, folderNode1);
         }
     }
 
@@ -123,7 +128,7 @@ public class LoaderTaskManager {
     class Worker extends AsyncTask<String, String, String> {
         private String login;
 
-        public Worker(AuthInfo authInfo) {
+        Worker(AuthInfo authInfo) {
             this.login = authInfo.getLogin();
             fileLoader.setUser(login, authInfo.getAccessToken());
         }
@@ -167,23 +172,30 @@ public class LoaderTaskManager {
         }
 
         private void doCommand(LoaderCommand loaderCommand) throws IOException {
-            boolean ok = false;
-            switch (loaderCommand.getType()) {
-                case LoaderCommand.FILE_DOWNLOAD:
-                    ok = fileLoader.downloadFile(loaderCommand.getPath());
+            String path = loaderCommand.getPath();
+            switch (loaderCommand.getActionType()) {
+                case ACTION_DOWNLOAD:
+                    if (loaderCommand.getObjType() == OBJ_FILE) {
+                        if (!fileLoader.downloadFile(path)) {
+                            throw new IOException("Can't download file:\n" + path);
+                        }
+                    } else {
+                        if (!fileLoader.getStorage().createPath(path)) {
+                            throw new IOException("Can't download folder:\n" + path);
+                        }
+                    }
                     break;
-                case LoaderCommand.FILE_UPLOAD:
-                    ok = fileLoader.uploadFile(loaderCommand.getPath());
+                case ACTION_UPLOAD:
+                    if (loaderCommand.getObjType() == OBJ_FILE) {
+                        if (!fileLoader.uploadFile(path)) {
+                            throw new IOException("Can't upload file:\n" + path);
+                        }
+                    } else if (loaderCommand.getObjType() == OBJ_FOLDER) {
+                        if (!fileLoader.getApiClient().postFolder(path)) {
+                            throw new IOException("Can't upload folder:\n" + path);
+                        }
+                    }
                     break;
-                case LoaderCommand.FOLDER_DOWNLOAD:
-                    ok = fileLoader.getApiClient().postFolder(loaderCommand.getPath());
-                    break;
-                case LoaderCommand.FOLDER_UPLOAD:
-                    ok = fileLoader.getStorage().createPath(loaderCommand.getPath());
-                    break;
-            }
-            if (!ok) {
-                throw new IOException();
             }
 
             publishProgress(loaderCommand.getLogin(), loaderCommand.getPath());

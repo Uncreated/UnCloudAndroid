@@ -61,7 +61,8 @@ public class Storage {
     }
 
     public boolean createPath(String folderPath) {
-        return new File(makeFullPath(folderPath)).mkdirs();
+        File folder = new File(makeFullPath(folderPath));
+        return folder.exists() || folder.mkdirs();
     }
 
     public void removeFile(String filePath, CallbackLoader callback) {
@@ -109,9 +110,9 @@ public class Storage {
         return new File(makeFullPath(fileTransfer.getPath()));
     }
 
-    public long getFileSize(String path){
+    public long getFileSize(String path) {
         File file = new File(makeFullPath(path));
-        if(file!=null){
+        if (file != null) {
             return file.length();
         }
         return 0;
