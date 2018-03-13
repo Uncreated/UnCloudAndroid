@@ -16,33 +16,56 @@ import static com.uncreated.uncloud.client.service.LoaderCommand.ACTION_DOWNLOAD
 import static com.uncreated.uncloud.client.service.LoaderCommand.ACTION_UPLOAD;
 import static com.uncreated.uncloud.client.service.LoaderCommand.OBJ_FILE;
 
-class LoaderWorker extends AsyncTask<String, String, String> {
-    private String login;
-    private FileLoader fileLoader;
-    private OnProgressListener onProgressListener;
-    private OnPostListener onPostListener;
+class LoaderWorker extends AsyncTask<String, LoaderWorker.Progress, String> {
+    private final String login;
+    private final FileLoader fileLoader;
+    private final OnProgressListener onProgressListener;
+    private final OnPostListener onPostListener;
 
-    LoaderWorker(FileLoader fileLoader, AuthInfo authInfo) {
+    class Progress {
+        final String login;
+        final String path;
+        final int cur;
+        final int max;
+
+        private Progress(String login, String path, int cur, int max) {
+            this.login = login;
+            this.path = path;
+            this.cur = cur;
+            this.max = max;
+        }
+
+        public String getLogin() {
+            return login;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public int getCur() {
+            return cur;
+        }
+
+        public int getMax() {
+            return max;
+        }
+    }
+
+    LoaderWorker(FileLoader fileLoader, AuthInfo authInfo, OnProgressListener onProgressListener, OnPostListener onPostListener) {
         this.login = authInfo.getLogin();
         this.fileLoader = fileLoader;
+        this.onProgressListener = onProgressListener;
+        this.onPostListener = onPostListener;
+
         fileLoader.setUser(login, authInfo.getAccessToken());
     }
 
-    void setOnProgressListener(OnProgressListener onProgressListener) {
-        this.onProgressListener = onProgressListener;
-    }
-
-    void setOnPostListener(OnPostListener onPostListener) {
-        this.onPostListener = onPostListener;
-    }
-
     @Override
-    protected void onProgressUpdate(String... values) {
+    protected void onProgressUpdate(Progress... values) {
         super.onProgressUpdate(values);
 
-        if (onProgressListener != null) {
-            onProgressListener.onProgress(values[0], values[1]);
-        }
+        onProgressListener.onProgress(values[0]);
     }
 
     @Override
@@ -54,13 +77,16 @@ class LoaderWorker extends AsyncTask<String, String, String> {
         RealmResults<LoaderCommand> loaderCommands = realm.where(LoaderCommand.class)
                 .equalTo("login", login)
                 .findAll();
+        int szi = loaderCommands.size();
+        int i = 0;
         while (loaderCommands.size() > 0) {
             try {
-                doCommand(loaderCommands.first());
+                doCommand(loaderCommands.first(), i, szi);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             realm.executeTransaction(realm1 -> loaderCommands.deleteFirstFromRealm());
+            i++;
         }
         return login;
     }
@@ -69,13 +95,12 @@ class LoaderWorker extends AsyncTask<String, String, String> {
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
 
-        if (onPostListener != null) {
-            onPostListener.onPost(s);
-        }
+        onPostListener.onPost(s);
     }
 
-    private void doCommand(LoaderCommand loaderCommand) throws IOException {
+    private void doCommand(LoaderCommand loaderCommand, int cur, int max) throws IOException {
         String path = loaderCommand.getPathSrc();
+        publishProgress(new Progress(login, path, cur, max));
         switch (loaderCommand.getActionType()) {
             case ACTION_DOWNLOAD:
                 if (loaderCommand.getObjType() == OBJ_FILE) {
@@ -105,8 +130,6 @@ class LoaderWorker extends AsyncTask<String, String, String> {
                 }
                 break;
         }
-
-        publishProgress(loaderCommand.getLogin(), loaderCommand.getPathSrc());
     }
 
     interface OnPostListener {
@@ -114,6 +137,6 @@ class LoaderWorker extends AsyncTask<String, String, String> {
     }
 
     interface OnProgressListener {
-        void onProgress(String login, String info);
+        void onProgress(Progress progress);
     }
 }

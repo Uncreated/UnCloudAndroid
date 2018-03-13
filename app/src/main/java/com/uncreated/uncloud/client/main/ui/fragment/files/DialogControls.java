@@ -12,14 +12,14 @@ import android.widget.TextView;
 import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.main.presentation.FileInfo;
 
-public class DialogControls extends Dialog {
-    private FileInfo fileInfo;
-    private View.OnClickListener onClickDownload;
-    private View.OnClickListener onClickUpload;
-    private View.OnClickListener onClickDeleteClient;
-    private View.OnClickListener onClickDeleteServer;
+class DialogControls extends Dialog {
+    private final FileInfo fileInfo;
+    private final View.OnClickListener onClickDownload;
+    private final View.OnClickListener onClickUpload;
+    private final View.OnClickListener onClickDeleteClient;
+    private final View.OnClickListener onClickDeleteServer;
 
-    public DialogControls(@NonNull Context context, FileInfo fileInfo,
+    DialogControls(@NonNull Context context, FileInfo fileInfo,
                           View.OnClickListener onClickDownload,
                           View.OnClickListener onClickUpload,
                           View.OnClickListener onClickDeleteClient,

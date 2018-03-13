@@ -19,15 +19,15 @@ import java.util.ArrayList;
 @InjectViewState
 public class FilesPresenter extends MvpPresenter<FilesView> {
     //Model
-    private Storage storage;
-    private ApiClient apiClient;
-    private LoaderTaskManager loaderTaskManager;
+    private final Storage storage;
+    private final ApiClient apiClient;
+    private final LoaderTaskManager loaderTaskManager;
+    private final LoaderSubscriber loaderSubscriber;
 
     private FolderNode mergedFolder;
     private FolderNode curFolder;
 
 
-    private LoaderSubscriber loaderSubscriber;
 
     public FilesPresenter() {
         storage = Model.getStorage();

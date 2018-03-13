@@ -1,7 +1,7 @@
 package com.uncreated.uncloud.client.service;
 
 public abstract class LoaderSubscriber {
-    private String login;
+    private final String login;
 
     protected LoaderSubscriber(String login) {
         this.login = login;

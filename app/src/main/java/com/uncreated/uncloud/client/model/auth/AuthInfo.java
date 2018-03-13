@@ -15,10 +15,9 @@ public class AuthInfo extends RealmObject {
     public AuthInfo() {
     }
 
-    public AuthInfo(String login, byte[] passwordHash, String accessToken) {
+    public AuthInfo(String login, byte[] passwordHash) {
         this.login = login;
         this.passwordHash = passwordHash;
-        this.accessToken = accessToken;
     }
 
     public String getLogin() {

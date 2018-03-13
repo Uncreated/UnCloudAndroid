@@ -1,7 +1,5 @@
 package com.uncreated.uncloud.client.model.storage;
 
-import com.uncreated.uncloud.client.model.fileloader.CallbackLoader;
-
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -25,7 +23,7 @@ public class Storage {
         return login;
     }
 
-    public String makeFullPath(String... sequence) {
+    private String makeFullPath(String... sequence) {
         StringBuilder stringBuilder = new StringBuilder(rootFolder);
         stringBuilder.append(login);
         for (String seq : sequence) {
@@ -43,7 +41,7 @@ public class Storage {
         return new FolderNode(userFolder);
     }
 
-    public void copyFile(FolderNode curFolder, CallbackLoader callback, File... files) {
+    /*public void copyFile(FolderNode curFolder, CallbackLoader callback, File... files) {
         try {
             for (File source : files) {
                 File dest = new File(makeFullPath(curFolder.getFilePath(), source.getName()));
@@ -58,7 +56,7 @@ public class Storage {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public boolean createPath(String folderPath) {
         File folder = new File(makeFullPath(folderPath));

@@ -6,7 +6,6 @@
 
     <string name="button_auth">Auth</string>
     <string name="button_register">Register</string>
-    <string name="button_remember_me">Remember Me</string>
     <string name="fab_create_folder">Create Folder</string>
     <string name="fab_add_file">Add File</string>
     <string name="menu_download">Download</string>
@@ -15,16 +14,15 @@
     <string name="menu_delete_server">Delete from server</string>
     <string name="change_user_title">Change User</string>
     <string name="loading">Loading&#8230;</string>
-    <string name="title_activity_main">MainActivity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_logout">Logout</string>
-    <string name="about_uncloud">About UnCloud</string>
+    <string name="menu_about">About UnCloud</string>
+    <string name="menu_home">Home</string>
+
     <string name="about_text">Author: Elfimov Alexey</string>
 
-    <string name="menu_home">Home</string>
 </resources>

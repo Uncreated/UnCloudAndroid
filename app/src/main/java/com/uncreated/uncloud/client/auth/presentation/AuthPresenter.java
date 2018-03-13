@@ -14,8 +14,8 @@ import com.uncreated.uncloud.client.model.auth.AuthManager;
 @InjectViewState
 public class AuthPresenter extends MvpPresenter<AuthView> {
     //Model
-    private AuthManager authManager;
-    private ApiClient apiClient;
+    private final AuthManager authManager;
+    private final ApiClient apiClient;
 
 
     private boolean withPass = true;
@@ -70,7 +70,7 @@ public class AuthPresenter extends MvpPresenter<AuthView> {
             AuthInfo authInfo;
             if (withPass) {
                 if (password.length() > 0) {
-                    authInfo = new AuthInfo(login, User.generatePasswordHash(password), null);
+                    authInfo = new AuthInfo(login, User.generatePasswordHash(password));
                 } else {
                     getViewState().showError("Empty password");
                     return;

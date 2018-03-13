@@ -14,6 +14,13 @@ public class FileInfo {
     private boolean deleteAnyClient;
     private boolean deleteAnyServer;
 
+    private void init(FileNode fileNode) {
+        this.name = fileNode.getName();
+        this.info = makeInfo(fileNode);
+        this.downloaded = fileNode.isOnClient();
+        this.uploaded = fileNode.isOnServer();
+    }
+
     FileInfo(FileNode fileNode) {
         init(fileNode);
 
@@ -32,13 +39,6 @@ public class FileInfo {
         this.uploadAny = !folderNode.isFilesOnServer(false);
         this.deleteAnyClient = folderNode.isFilesOnClient(false);
         this.deleteAnyServer = folderNode.isFilesOnServer(false);
-    }
-
-    private void init(FileNode fileNode) {
-        this.name = fileNode.getName();
-        this.info = makeInfo(fileNode);
-        this.downloaded = fileNode.isOnClient();
-        this.uploaded = fileNode.isOnServer();
     }
 
     private String makeInfo(FileNode fileNode) {

@@ -20,7 +20,7 @@ public class LoaderCommand extends RealmObject {
     public LoaderCommand() {
     }
 
-    public LoaderCommand(int actionType, int objType, String login, String pathSrc) {
+    LoaderCommand(int actionType, int objType, String login, String pathSrc) {
         this.actionType = actionType;
         this.objType = objType;
         this.login = login;

@@ -1,53 +1,49 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             tools:context="com.uncreated.uncloud.client.main.ui.fragment.files.FilesFragment">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.uncreated.uncloud.client.main.ui.fragment.files.FilesFragment">
 
-    <RelativeLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical"/>
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:id="@+id/fab_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/fab_margin"
+        app:fab_addButtonColorNormal="#2a7fb8"
+        app:fab_addButtonColorPressed="#226693"
+        app:fab_addButtonPlusIconColor="#c4d6e2"
+        app:fab_labelStyle="@style/fab_menu_label_style">
 
-        <com.getbase.floatingactionbutton.FloatingActionsMenu
-            android:id="@+id/fab_menu"
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/create_folder_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="16dp"
-            app:fab_addButtonColorNormal="#2a7fb8"
-            app:fab_addButtonColorPressed="#226693"
-            app:fab_addButtonPlusIconColor="#c4d6e2"
-            app:fab_labelStyle="@style/fab_menu_label_style">
+            app:fab_colorNormal="#2a7fb8"
+            app:fab_colorPressed="#226693"
+            app:fab_icon="@drawable/create_folder"
+            app:fab_size="normal"
+            app:fab_title="@string/fab_create_folder" />
 
-            <com.getbase.floatingactionbutton.FloatingActionButton
-                android:id="@+id/create_folder_fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:fab_colorNormal="#2a7fb8"
-                app:fab_colorPressed="#226693"
-                app:fab_icon="@drawable/create_folder"
-                app:fab_size="normal"
-                app:fab_title="@string/fab_create_folder"/>
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_file_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_colorNormal="#2a7fb8"
+            app:fab_colorPressed="#226693"
+            app:fab_icon="@drawable/add_file"
+            app:fab_size="normal"
+            app:fab_title="@string/fab_add_file" />
 
-            <com.getbase.floatingactionbutton.FloatingActionButton
-                android:id="@+id/add_file_fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:fab_colorNormal="#2a7fb8"
-                app:fab_colorPressed="#226693"
-                app:fab_icon="@drawable/add_file"
-                app:fab_size="normal"
-                app:fab_title="@string/fab_add_file"/>
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
-        </com.getbase.floatingactionbutton.FloatingActionsMenu>
-    </RelativeLayout>
-
-</FrameLayout>
+</RelativeLayout>

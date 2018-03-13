@@ -133,7 +133,7 @@ public class FilesFragment extends BaseFragment implements FilesView {
         }
     }
 
-    public void onCreateFolderClick() {
+    private void onCreateFolderClick() {
         floatingActionsMenu.collapse();
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogTheme);
@@ -160,7 +160,7 @@ public class FilesFragment extends BaseFragment implements FilesView {
         dialogBuilder.show();
     }
 
-    public void onAddFileClick() {
+    private void onAddFileClick() {
         floatingActionsMenu.collapse();
         showFileChooser();
     }

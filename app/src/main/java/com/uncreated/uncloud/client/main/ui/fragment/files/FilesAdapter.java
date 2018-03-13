@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.ViewHolder> {
-    private List<FileInfo> files;
-    private FilesFragment filesFragment;
-    private RecyclerView recyclerView;
-    private boolean back;
+    private final List<FileInfo> files;
+    private final FilesFragment filesFragment;
+    private final RecyclerView recyclerView;
+    private final boolean back;
 
     public FilesAdapter(FilesFragment filesFragment, RecyclerView recyclerView, ArrayList<FileInfo> files, boolean back) {
         this.files = files;
@@ -29,12 +29,8 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_item, parent, false);
-        v.setOnClickListener(view ->
-        {
-            filesFragment.onClickFile(get(v));
-        });
-        v.setOnLongClickListener(view ->
-        {
+        v.setOnClickListener(view -> filesFragment.onClickFile(get(v)));
+        v.setOnLongClickListener(view -> {
             filesFragment.onLongClickFile(get(v));
             return true;
         });
@@ -96,8 +92,8 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.ViewHolder> 
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageView;
-        TextView textView;
+        final ImageView imageView;
+        final TextView textView;
 
         ViewHolder(View itemView) {
             super(itemView);

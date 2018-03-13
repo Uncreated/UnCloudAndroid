@@ -31,13 +31,11 @@ public class Model {
     private static ApiClient apiClient;
     private static Storage storage;
     private static LoaderTaskManager loaderTaskManager;
-    private static Gson gson = new GsonBuilder()
+    private static final Gson gson = new GsonBuilder()
             .registerTypeHierarchyAdapter(byte[].class,
                     new ByteArrayToBase64TypeAdapter()).create();
-    private static Context context;
 
     public static void init(Context context) {
-        Model.context = context;
         authManager = new AuthManager(context);
         apiClient = new ApiClient();
         storage = new Storage(context.getFilesDir().getAbsolutePath());

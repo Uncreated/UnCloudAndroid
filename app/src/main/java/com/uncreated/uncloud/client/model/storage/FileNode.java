@@ -1,23 +1,25 @@
 package com.uncreated.uncloud.client.model.storage;
 
+import android.support.annotation.NonNull;
+
 import java.io.File;
 import java.text.DecimalFormat;
 
 public class FileNode implements Comparable<FileNode> {
     protected String name;
 
-    protected FolderNode parentFolder;
+    FolderNode parentFolder;
 
-    protected boolean onClient;
-    protected boolean onServer;
+    boolean onClient;
+    boolean onServer;
 
     private Long size;
 
-    public FileNode(File file) {
+    FileNode(File file) {
         this(file.getName(), file.length());
     }
 
-    public FileNode(String name, Long size) {
+    FileNode(String name, Long size) {
         this.name = name;
         this.size = size;
     }
@@ -60,7 +62,7 @@ public class FileNode implements Comparable<FileNode> {
     }
 
     @Override
-    public int compareTo(FileNode o) {
+    public int compareTo(@NonNull FileNode o) {
         return name.toLowerCase().compareTo(o.name.toLowerCase());
     }
 

@@ -10,8 +10,8 @@ import com.uncreated.uncloud.client.model.storage.Storage;
 import java.io.IOException;
 
 public class FileLoader {
-    private Storage storage;
-    private ApiClient apiClient;
+    private final Storage storage;
+    private final ApiClient apiClient;
 
     public FileLoader(Context context) {
         storage = new Storage(context.getFilesDir().getAbsolutePath());

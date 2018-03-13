@@ -26,13 +26,14 @@ import static com.uncreated.uncloud.client.service.LoaderCommand.OBJ_FOLDER;
 При прерывании выполнения задачи, после перезапуска работа возобновляется
  */
 public class LoaderTaskManager {
-    private LoaderService loaderService;
-    private FileLoader fileLoader;
 
-    private HashMap<String, LoaderSubscriber> subscribers = new HashMap<>();
-    private Realm realm;
+    private final LoaderService loaderService;
+    private final FileLoader fileLoader;
+    private final AuthManager authManager;
+    private final HashMap<String, LoaderSubscriber> subscribers = new HashMap<>();
+    private final Realm realm;
+
     private LoaderWorker worker;
-    private AuthManager authManager;
 
     LoaderTaskManager(LoaderService loaderService) {
         this.loaderService = loaderService;
@@ -48,15 +49,18 @@ public class LoaderTaskManager {
         startWorker();
     }
 
-    private void startWorker() {
+    private boolean startWorker() {
         LoaderCommand loaderCommand = realm.where(LoaderCommand.class).findFirst();
         if (loaderCommand != null && (worker == null || worker.getStatus() != AsyncTask.Status.RUNNING)) {
             AuthInfo authInfo = authManager.get(loaderCommand.getLogin());
-            worker = new LoaderWorker(fileLoader, authInfo);
-            worker.setOnProgressListener(loaderService::onNotification);
-            worker.setOnPostListener(this::workerFinished);
+            worker = new LoaderWorker(fileLoader,
+                    authInfo,
+                    loaderService::onNotification,
+                    this::workerFinished);
             worker.execute();
+            return true;
         }
+        return false;
     }
 
     private void workerFinished(String login) {
@@ -64,7 +68,9 @@ public class LoaderTaskManager {
         if (loaderSubscriber != null) {
             loaderSubscriber.onResult(null);
         }
-        startWorker();
+        if (!startWorker()) {
+            loaderService.onNotification(null);
+        }
     }
 
     public boolean taskDownloadFile(LoaderSubscriber loaderSubscriber, FileNode... fileNodes) {
@@ -109,9 +115,7 @@ public class LoaderTaskManager {
             }
         });
 
-        startWorker();
-
-        return true;
+        return startWorker();
     }
 
     private void addFile(int actionType, String login, FileNode fileNode) {

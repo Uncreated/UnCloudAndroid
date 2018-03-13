@@ -1,8 +1,22 @@
 <resources>
 
-    <style name="CloudTheme.NoActionBar">
+    <style name="CloudTheme" parent="Theme.AppCompat.Light" />
+
+    <style name="CloudTheme.NoActionBar" parent="CloudTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="CloudTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="CloudTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="AlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert" />
+
+    <style name="fab_menu_label_style">
+        <item name="android:background">@drawable/fab_label_drawable</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">20sp</item>
     </style>
 </resources>

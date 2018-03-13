@@ -1,17 +1,17 @@
 package com.uncreated.uncloud.client;
 
-import android.app.AlertDialog;
 import android.content.Context;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.uncreated.uncloud.R;
 
 public class Base implements BaseView {
-    private AlertDialog alertDialog;
-    private Context context;
+    private final AlertDialog alertDialog;
+    private final Context context;
 
-    public Base(Context context) {
+    Base(Context context) {
         this.context = context;
 
         alertDialog = new AlertDialog.Builder(context)

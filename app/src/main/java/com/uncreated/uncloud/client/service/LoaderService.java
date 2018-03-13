@@ -8,8 +8,12 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
+import com.uncreated.uncloud.R;
+
 public class LoaderService extends Service {
-    private ServiceBinder binder = new ServiceBinder();
+    private static final String CHANNEL_LOADING = "loadingChannel";
+
+    private final ServiceBinder binder = new ServiceBinder();
     private LoaderTaskManager loaderTaskManager;
 
     @Override
@@ -25,13 +29,16 @@ public class LoaderService extends Service {
         return binder;
     }
 
-    public void onNotification(String login, String path) {
-        if (login == null) {
+    public void onNotification(LoaderWorker.Progress progress) {
+        if (progress == null) {
             stopForeground(true);
         } else {
             //debug
-            Notification notification = new NotificationCompat.Builder(this)
-                    .setContentText(login + " " + path)
+            Notification notification = new NotificationCompat.Builder(this, CHANNEL_LOADING)
+                    .setSmallIcon(R.drawable.uncloud)
+                    .setContentTitle(progress.getLogin())
+                    .setContentText(progress.getPath())
+                    .setProgress(progress.getMax(), progress.getCur(), false)
                     .build();
             startForeground(123, notification);
         }

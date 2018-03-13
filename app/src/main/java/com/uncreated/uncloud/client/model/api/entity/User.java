@@ -26,11 +26,7 @@ public class User {
 
     public static byte[] generatePasswordHash(String password) {
         try {
-            //sha512(sha512(pass))
-            byte[] passBytes = password.getBytes("UTF-8");
-            byte[] sha512a = sha512(passBytes);
-            byte[] sha512b = sha512(sha512a);
-            return sha512b;
+            return sha512(sha512(password.getBytes("UTF-8")));
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;

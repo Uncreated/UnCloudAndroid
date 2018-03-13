@@ -6,9 +6,11 @@ import com.arellomobile.mvp.viewstate.strategy.SkipStrategy;
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 import com.uncreated.uncloud.client.BaseView;
 
+import java.util.List;
+
 public interface AuthView extends BaseView {
     @StateStrategyType(AddToEndSingleStrategy.class)
-    void addNames(String[] names);
+    void addNames(List<String> names);
 
     @StateStrategyType(AddToEndSingleStrategy.class)
     void setPassword(boolean lock);

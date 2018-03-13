@@ -9,13 +9,13 @@ public class FolderNode extends FileNode {
     private ArrayList<FolderNode> folders;
     private ArrayList<FileNode> files;
 
-    public FolderNode(String name) {
+    private FolderNode(String name) {
         super(name, 0L);
         folders = new ArrayList<>();
         files = new ArrayList<>();
     }
 
-    public FolderNode(File rootFolder) throws FileNotFoundException {
+    FolderNode(File rootFolder) throws FileNotFoundException {
         this(rootFolder.getName());
 
         if (!rootFolder.exists() || !rootFolder.isDirectory()) {

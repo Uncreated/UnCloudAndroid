@@ -1,8 +1,8 @@
 package com.uncreated.uncloud.client.auth.ui.activity;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.text.InputFilter;
 import android.text.method.KeyListener;
 import android.view.View;
@@ -17,6 +17,8 @@ import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.BaseActivity;
 import com.uncreated.uncloud.client.auth.presentation.AuthPresenter;
 import com.uncreated.uncloud.client.main.ui.activity.MainActivity;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,12 +42,12 @@ public class AuthActivity extends BaseActivity implements AuthView {
     private KeyListener loginKeyListener;
     private KeyListener passwordKeyListener;
 
-    private String[] names;
+    private List<String> names;
 
     private AlertDialog alertDialog;
 
     @InjectPresenter(type = PresenterType.GLOBAL, tag = "AuthPresenter")
-    AuthPresenter mAuthPresenter;
+    AuthPresenter authPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +73,8 @@ public class AuthActivity extends BaseActivity implements AuthView {
         passwordEditText.setFilters(filters);
     }
 
-
     @Override
-    public void addNames(String[] names) {
+    public void addNames(List<String> names) {
         this.names = names;
         if (names == null) {
             changeUserButton.setVisibility(View.INVISIBLE);
@@ -146,15 +147,15 @@ public class AuthActivity extends BaseActivity implements AuthView {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        mAuthPresenter.onBack();
+        authPresenter.onBack();
     }
 
     public void onRegisterClick(View view) {
-        mAuthPresenter.onRegister(loginEditText.getText().toString(), passwordEditText.getText().toString());
+        authPresenter.onRegister(loginEditText.getText().toString(), passwordEditText.getText().toString());
     }
 
     public void onAuthClick(View view) {
-        mAuthPresenter.onAuth(loginEditText.getText().toString(), passwordEditText.getText().toString());
+        authPresenter.onAuth(loginEditText.getText().toString(), passwordEditText.getText().toString());
     }
 
     public void onChangeUserClick(View view) {
@@ -172,10 +173,10 @@ public class AuthActivity extends BaseActivity implements AuthView {
         builder.setAdapter(arrayAdapter, (dialogInterface, i) ->
         {
             if (i == 0) {
-                mAuthPresenter.selectName(null);
+                authPresenter.selectName(null);
                 dialogInterface.dismiss();
             } else {
-                mAuthPresenter.selectName(arrayAdapter.getItem(i));
+                authPresenter.selectName(arrayAdapter.getItem(i));
                 dialogInterface.dismiss();
             }
         });

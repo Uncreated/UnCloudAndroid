@@ -2,8 +2,9 @@ package com.uncreated.uncloud.client.main.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -11,8 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.arellomobile.mvp.MvpFragment;
 import com.uncreated.uncloud.R;
@@ -65,19 +66,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public void switchFiles() {
+    private void switchFiles() {
         switchFragment(filesFragment = new FilesFragment());
     }
 
-    public void switchSettings() {
+    private void switchSettings() {
         switchFragment(settingsFragment = new SettingsFragment());
     }
 
-    public void switchAbout() {
+    private void switchAbout() {
         switchFragment(aboutFragment = new AboutFragment());
     }
 
-    public void logout() {
+    private void logout() {
         if (filesFragment != null) {
             filesFragment.getMvpDelegate().onDestroy();
         }
@@ -96,40 +97,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .commitAllowingStateLoss();
     }
 
-    private boolean firstClickOnBack = false;
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if (firstClickOnBack) {
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_HOME);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Click again to exit the app", Toast.LENGTH_LONG).show();
-                firstClickOnBack = true;
-                new Handler().postDelayed(() -> firstClickOnBack = false, 2000);
+            View view = findViewById(android.R.id.content);
+            if (view != null) {
+                Snackbar.make(view, "Close the application?", Snackbar.LENGTH_LONG)
+                        .setAction("Yes", this::closeApp)
+                        .show();
             }
         }
+    }
+
+    private void closeApp(View view) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         BaseFragment baseFragment = (BaseFragment) getFragmentManager().findFragmentByTag(contentFragmentTag);
-        if (baseFragment != null && baseFragment.dispatchTouchEvent(event)) {
-            return true;
-        }
-
-        return super.dispatchTouchEvent(event);
+        return baseFragment != null && baseFragment.dispatchTouchEvent(event) || super.dispatchTouchEvent(event);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.nav_home:
                 switchFiles();

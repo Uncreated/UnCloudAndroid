@@ -3,6 +3,9 @@ package com.uncreated.uncloud.client.model.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
@@ -13,8 +16,8 @@ public class AuthManager {
     private static final String PREF_KEY_AUTH = "prefKeyAuthManager";
     private static final String KEY_LAST_LOGIN = "keyLastLogin";
 
-    private SharedPreferences sharedPreferences;
-    private Realm realm;
+    private final SharedPreferences sharedPreferences;
+    private final Realm realm;
 
     public AuthManager(Context context) {
         sharedPreferences = context.getSharedPreferences(PREF_KEY_AUTH, MODE_PRIVATE);
@@ -25,15 +28,20 @@ public class AuthManager {
                 .build());
     }
 
-    public String[] getNames() {
+    public List<String> getNames() {
         RealmResults<AuthInfo> authInfoList = realm.where(AuthInfo.class).findAll();
 
         if (authInfoList.size() == 0)
             return null;
 
-        String[] names = new String[authInfoList.size()];
+        List<String> names = new LinkedList<>();
         for (int i = 0; i < authInfoList.size(); i++) {
-            names[i] = authInfoList.get(i).getLogin();
+            AuthInfo authInfo = authInfoList.get(i);
+            if (authInfo == null) {
+                authInfoList.deleteFromRealm(i);
+            } else {
+                names.add(authInfo.getLogin());
+            }
         }
         return names;
     }
@@ -43,11 +51,9 @@ public class AuthManager {
     }
 
     public AuthInfo get(String key) {
-        AuthInfo authInfo = realm.where(AuthInfo.class)
+        return realm.where(AuthInfo.class)
                 .equalTo("login", key)
                 .findFirst();
-
-        return authInfo;
     }
 
     public void save(AuthInfo authInfo, String accessToken) {
