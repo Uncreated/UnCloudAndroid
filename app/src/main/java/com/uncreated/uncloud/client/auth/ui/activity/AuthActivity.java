@@ -17,6 +17,7 @@ import com.uncreated.uncloud.R;
 import com.uncreated.uncloud.client.BaseActivity;
 import com.uncreated.uncloud.client.auth.presentation.AuthPresenter;
 import com.uncreated.uncloud.client.main.ui.activity.MainActivity;
+import com.uncreated.uncloud.client.widget.FilesAppWidget;
 
 import java.util.List;
 
@@ -141,6 +142,8 @@ public class AuthActivity extends BaseActivity implements AuthView {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.KEY_LOGIN, login);
         startActivityForResult(intent, 0);
+
+        FilesAppWidget.callUpdate(getApplicationContext());
     }
 
     @Override

@@ -20,10 +20,10 @@ class DialogControls extends Dialog {
     private final View.OnClickListener onClickDeleteServer;
 
     DialogControls(@NonNull Context context, FileInfo fileInfo,
-                          View.OnClickListener onClickDownload,
-                          View.OnClickListener onClickUpload,
-                          View.OnClickListener onClickDeleteClient,
-                          View.OnClickListener onClickDeleteServer) {
+                   View.OnClickListener onClickDownload,
+                   View.OnClickListener onClickUpload,
+                   View.OnClickListener onClickDeleteClient,
+                   View.OnClickListener onClickDeleteServer) {
         super(context);
 
         this.fileInfo = fileInfo;

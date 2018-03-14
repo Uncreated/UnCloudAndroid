@@ -27,8 +27,6 @@ public class FilesPresenter extends MvpPresenter<FilesView> {
     private FolderNode mergedFolder;
     private FolderNode curFolder;
 
-
-
     public FilesPresenter() {
         storage = Model.getStorage();
         apiClient = Model.getApiClient();

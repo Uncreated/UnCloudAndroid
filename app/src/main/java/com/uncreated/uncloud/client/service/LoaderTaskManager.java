@@ -7,6 +7,7 @@ import com.uncreated.uncloud.client.model.auth.AuthManager;
 import com.uncreated.uncloud.client.model.fileloader.FileLoader;
 import com.uncreated.uncloud.client.model.storage.FileNode;
 import com.uncreated.uncloud.client.model.storage.FolderNode;
+import com.uncreated.uncloud.client.widget.FilesAppWidget;
 
 import java.io.File;
 import java.util.HashMap;
@@ -68,6 +69,7 @@ public class LoaderTaskManager {
         if (loaderSubscriber != null) {
             loaderSubscriber.onResult(null);
         }
+        FilesAppWidget.callUpdate(loaderService.getApplicationContext());
         if (!startWorker()) {
             loaderService.onNotification(null);
         }

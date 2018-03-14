@@ -85,6 +85,7 @@ public class AuthPresenter extends MvpPresenter<AuthView> {
                         authManager.save(authInfo, body.getAccessToken());
                         getViewState().switchMainActivity(body.getLogin());
                         getViewState().setLoading(false);
+
                     })
                     .setOnFailedEvent(this::onFailed)
                     .add(400, this::onBadRequest)

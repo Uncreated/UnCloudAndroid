@@ -5,8 +5,10 @@ import android.content.Context;
 import com.uncreated.uncloud.client.model.Model;
 import com.uncreated.uncloud.client.model.api.ApiClient;
 import com.uncreated.uncloud.client.model.storage.FileTransfer;
+import com.uncreated.uncloud.client.model.storage.FolderNode;
 import com.uncreated.uncloud.client.model.storage.Storage;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class FileLoader {
@@ -60,5 +62,15 @@ public class FileLoader {
         }
         while (i < fileTransfer.getParts());
         return true;
+    }
+
+    public long getLocalFolderSize() {
+        try {
+            FolderNode clientFolder = storage.getFiles();
+            return clientFolder.getSize();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 }
